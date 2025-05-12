@@ -1,1 +1,27 @@
-/build/
+# Eclipse 설정 파일
+.classpath
+.project
+.settings/
+.metadata/
+
+# 빌드 디렉터리
+/target/
+*.class
+*.jar
+
+# 환경설정 파일
+config.properties
+db.properties
+*.env
+
+# IDE 관련 파일
+.idea/
+*.iml
+.vscode/
+
+# OS 별 파일
+.DS_Store
+Thumbs.db
+
+# 로그 파일
+*.log
