@@ -9,7 +9,7 @@
     PerFortival
 </h1>
 <hr>
-    
+
 <!-- 검색 폼 -->
 <form action="<%= request.getContextPath() %>/admin/performances" method="get">
     <input type="text" name="searchKeyword" placeholder="검색어 입력" />
@@ -18,21 +18,22 @@
     <button type="submit">검색</button>
 </form>
 
-<!-- 검색 결과가 있을 경우 출력 -->
-<c:choose>
-    <c:when test="${not empty searchResults}">
-        <form action="<%= request.getContextPath() %>/admin/performances" method="post">
-            <table border="1" style="width: 100%; margin-top: 10px;">
-                <thead>
-                    <tr>
-                        <th>선택</th>
-                        <th>공연명</th>
-                        <th>기간</th>
-                        <th>장소</th>
-                        <th>장르</th>
-                    </tr>
-                </thead>
-                <tbody>
+<hr>
+
+<form action="<%= request.getContextPath() %>/admin/performances" method="post" style="margin-top: 10px;">
+    <table border="1" style="width: 100%; margin-top: 20px;">
+        <thead>
+            <tr>
+                <th>선택</th>
+                <th>공연명</th>
+                <th>기간</th>
+                <th>장소</th>
+                <th>장르</th>
+            </tr>
+        </thead>
+        <tbody>
+            <c:choose>
+                <c:when test="${not empty searchResults}">
                     <c:forEach var="performance" items="${searchResults}">
                         <tr>
                             <td>
@@ -44,13 +45,22 @@
                             <td>${performance.genre}</td>
                         </tr>
                     </c:forEach>
-                </tbody>
-            </table>
-            <button type="submit" style="margin-top: 10px;">선택한 공연 저장</button>
-        </form>
-    </c:when>
+                </c:when>
+                <c:otherwise>
+                    <tr>
+                        <td colspan="5">검색 결과가 없습니다.</td>
+                    </tr>
+                </c:otherwise>
+            </c:choose>
+        </tbody>
+    </table>
 
-    <c:otherwise>
-        <p style="margin-top: 20px;">검색 결과가 없습니다.</p>
-    </c:otherwise>
-</c:choose>
+    <br>
+		<form action="<%= request.getContextPath() %>/admin/performances" method="post" style="margin-top: 10px;">
+		    <button type="submit" name="action" value="save">선택한 공연 저장</button>
+		</form>
+		<hr>
+		<!-- 예매 방식 관리 버튼은 그냥 링크로 바꿔 -->
+		<form action="<%= request.getContextPath() %>/reservation" method="get" style="margin-top: 10px;">
+		    <button type="submit">공연 예매 방식 관리</button>
+		</form>

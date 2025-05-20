@@ -21,6 +21,7 @@ import com.perfortival.performance.dto.PerformanceDTO;
 public class PerformanceService {
 
     private static final String API_URL = "http://kopis.or.kr/openApi/restful/pblprfr?";
+    private PerformanceDAO performanceDAO = new PerformanceDAO();
 
     public List<PerformanceDTO> fetchPerformances(String keyword, String startDate, String endDate) {
         List<PerformanceDTO> performanceList = new ArrayList<>();
@@ -78,8 +79,7 @@ public class PerformanceService {
                         dto.setEndDate(getTagValue("prfpdto", element));
                         dto.setLocation(getTagValue("fcltynm", element));
                         dto.setGenre(getTagValue("genrenm", element));
-                        String posterUrl = getTagValue("poster", element);
-                        dto.setPosterUrl(posterUrl);
+                        dto.setPosterUrl(getTagValue("poster", element));
 
                         performanceList.add(dto);
                     }
@@ -88,7 +88,7 @@ public class PerformanceService {
                 System.out.println("[INFO] 공연 목록 수: " + performanceList.size());
 
             } else {
-                System.out.println("[ERROR] API 요청 실패: " + responseCode);
+                System.err.println("[ERROR] API 요청 실패: " + responseCode);
             }
 
         } catch (Exception e) {
@@ -99,7 +99,6 @@ public class PerformanceService {
         return performanceList;
     }
 
-    // XML 태그 값을 추출하는 메서드
     private String getTagValue(String tag, Element element) {
         NodeList nodeList = element.getElementsByTagName(tag);
         if (nodeList.getLength() > 0) {
@@ -111,12 +110,63 @@ public class PerformanceService {
         return "";
     }
 
-    private PerformanceDAO performanceDAO = new PerformanceDAO();
-
-    // 공연 ID로 공연 정보 조회
     public PerformanceDTO getPerformanceById(String id) {
-        // DAO에서 공연 정보를 가져온다.
-        return performanceDAO.getPerformanceById(id);
+        PerformanceDTO performance = null;
+
+        try {
+            String apiKey = ConfigUtil.getApiKey();
+            String apiUrl = "http://kopis.or.kr/openApi/restful/pblprfr/" + id + "?service=" + apiKey;
+
+            System.out.println("[INFO] API 요청 URL: " + apiUrl);
+
+            URL url = new URL(apiUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
+
+            int responseCode = conn.getResponseCode();
+            System.out.println("[INFO] API 응답 코드: " + responseCode);
+
+            if (responseCode == 200) {
+                InputStream inputStream = conn.getInputStream();
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.parse(inputStream);
+                doc.getDocumentElement().normalize();
+
+                NodeList nodeList = doc.getElementsByTagName("db");
+
+                if (nodeList.getLength() > 0) {
+                    Node node = nodeList.item(0);
+
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        Element element = (Element) node;
+
+                        performance = new PerformanceDTO();
+                        performance.setId(id);
+                        performance.setTitle(getTagValue("prfnm", element));
+                        performance.setStartDate(getTagValue("prfpdfrom", element));
+                        performance.setEndDate(getTagValue("prfpdto", element));
+                        performance.setLocation(getTagValue("fcltynm", element));
+                        performance.setGenre(getTagValue("genrenm", element));
+                        performance.setPosterUrl(getTagValue("poster", element));
+
+                        System.out.println("[INFO] 공연 데이터 수신 완료: " + performance.getTitle());
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] 공연 조회 중 오류: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return performance;
     }
-   
+    
+    public List<PerformanceDTO> getPerformancesByIds(String[] ids) {
+        return performanceDAO.findByIds(ids);
+    }
+
 }

@@ -19,11 +19,27 @@ public class PerformanceDAO {
         "ON DUPLICATE KEY UPDATE title = ?, start_date = ?, end_date = ?, location = ?, genre = ?, poster_url = ?, admin_selected = ?";
 
     // 공연 저장 메서드- 관리자가 선택한 공연만 저장
-    public void savePerformance(PerformanceDTO performance) {
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(INSERT_SQL)) {
+    public int savePerformance(PerformanceDTO performance) {
+        String sql = "INSERT INTO performances (id, title, start_date, end_date, location, genre, poster_url, admin_selected) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
+                     "ON DUPLICATE KEY UPDATE " +
+                     "title = VALUES(title), " +
+                     "start_date = VALUES(start_date), " +
+                     "end_date = VALUES(end_date), " +
+                     "location = VALUES(location), " +
+                     "genre = VALUES(genre), " +
+                     "poster_url = VALUES(poster_url), " +
+                     "admin_selected = VALUES(admin_selected)";
 
-            pstmt.setString(1, performance.getId()); 
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        int rowsAffected = 0;
+
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, performance.getId());
             pstmt.setString(2, performance.getTitle());
             pstmt.setString(3, performance.getStartDate());
             pstmt.setString(4, performance.getEndDate());
@@ -32,22 +48,17 @@ public class PerformanceDAO {
             pstmt.setString(7, performance.getPosterUrl());
             pstmt.setBoolean(8, performance.isAdminSelected());
 
-            // ON DUPLICATE KEY UPDATE
-            pstmt.setString(9, performance.getTitle());
-            pstmt.setString(10, performance.getStartDate());
-            pstmt.setString(11, performance.getEndDate());
-            pstmt.setString(12, performance.getLocation());
-            pstmt.setString(13, performance.getGenre());
-            pstmt.setString(14, performance.getPosterUrl());
-            pstmt.setBoolean(15, performance.isAdminSelected());
-
-            pstmt.executeUpdate();
-            System.out.println("[INFO] 공연 저장 완료: " + performance.getTitle());
+            rowsAffected = pstmt.executeUpdate();
+            System.out.println("[INFO] DB 저장/업데이트 완료 - 영향받은 행: " + rowsAffected);
 
         } catch (SQLException e) {
-            System.err.println("[ERROR] 공연 저장 중 오류 발생: " + e.getMessage());
+            System.err.println("[ERROR] 공연 저장 중 SQL 오류: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            DBUtil.close(null, pstmt, conn);
         }
+
+        return rowsAffected;
     }
 
     // 2. 공연 목록 조회 (기간 및 검색어 기반, 관리자가 선택한 공연만 조회)
@@ -202,5 +213,47 @@ public class PerformanceDAO {
         }
 
         return performance;
+    }
+
+    // 선택된 ID들로 공연 목록 조회
+    public List<PerformanceDTO> findByIds(String[] ids) {
+        List<PerformanceDTO> performanceList = new ArrayList<>();
+
+        if (ids == null || ids.length == 0) return performanceList;
+
+        StringBuilder query = new StringBuilder("SELECT id, title, start_date, end_date, location, genre, poster_url FROM performances WHERE id IN (");
+        for (int i = 0; i < ids.length; i++) {
+            query.append("?");
+            if (i < ids.length - 1) query.append(",");
+        }
+        query.append(")");
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query.toString())) {
+
+            for (int i = 0; i < ids.length; i++) {
+                pstmt.setString(i + 1, ids[i]);
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    PerformanceDTO performance = new PerformanceDTO();
+                    performance.setId(rs.getString("id"));
+                    performance.setTitle(rs.getString("title"));
+                    performance.setStartDate(rs.getString("start_date"));
+                    performance.setEndDate(rs.getString("end_date"));
+                    performance.setLocation(rs.getString("location"));
+                    performance.setGenre(rs.getString("genre"));
+                    performance.setPosterUrl(rs.getString("poster_url"));
+                    performanceList.add(performance);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("[ERROR] 공연 ID 목록 조회 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return performanceList;
     }
 }

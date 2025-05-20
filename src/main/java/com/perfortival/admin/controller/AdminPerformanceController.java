@@ -20,16 +20,13 @@ public class AdminPerformanceController extends HttpServlet {
     private PerformanceService performanceService = new PerformanceService();
     private PerformanceDAO performanceDAO = new PerformanceDAO();
 
-    // API에서 받아온 공연 데이터를 임시로 저장할 리스트
-    private List<PerformanceDTO> searchResults = new ArrayList<>();
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String searchKeyword = request.getParameter("searchKeyword");
         String startDate = request.getParameter("startDate");
         String endDate = request.getParameter("endDate");
 
-        searchResults.clear();  // 이전 검색 결과 초기화
+        List<PerformanceDTO> searchResults = new ArrayList<>();
 
         try {
             if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
@@ -48,48 +45,69 @@ public class AdminPerformanceController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String[] selectedIds = request.getParameterValues("selectedPerformances");
+        String action = request.getParameter("action");
 
-        if (selectedIds != null) {
-            for (String id : selectedIds) {
-                try {
-                    System.out.println("[DEBUG] 저장하려는 ID: " + id);
+        // 🔍 디버깅 로그 필수
+        System.out.println("[DEBUG] doPost 진입");
+        System.out.println("[DEBUG] action = " + action);
+        System.out.println("[DEBUG] selectedIds = " + (selectedIds == null ? "null" : String.join(", ", selectedIds)));
 
-                    // searchResults 리스트에서 선택한 공연 찾기
-                    PerformanceDTO selectedPerformance = null;
+        if (action == null) {
+            response.sendRedirect(request.getContextPath() + "/admin/performances");
+            return;
+        }
 
-                    for (PerformanceDTO performance : searchResults) {
-                        if (performance.getId().equals(id)) {
-                            selectedPerformance = performance;
-                            break;
-                        }
-                    }
+        try {
+            switch (action) {
+                case "save":
+                    if (selectedIds != null) handleSave(selectedIds);
+                    response.sendRedirect(request.getContextPath() + "/admin/performances");
+                    return;
 
-                    if (selectedPerformance != null) {
-                        System.out.println("[INFO] 저장할 공연명: " + selectedPerformance.getTitle());
-                        selectedPerformance.setAdminSelected(true);
-
-                        // 포스터 URL이 null이 아니면 설정
-                        String posterUrl = selectedPerformance.getPosterUrl();
-                        if (posterUrl == null || posterUrl.isEmpty()) {
-                            posterUrl = "https://default-image-path.com/default.jpg"; // 기본 이미지 경로
-                        }
-                        selectedPerformance.setPosterUrl(posterUrl);
-
-                        // DB에 저장
-                        performanceDAO.savePerformance(selectedPerformance);
-
-                        System.out.println("[INFO] 공연 저장 성공: " + selectedPerformance.getTitle() + " / 포스터: " + posterUrl);
+                case "reservation":
+                    if (selectedIds != null && selectedIds.length > 0) {
+                        handleReservation(selectedIds, request, response);
+                        return; // ❗ redirect 후 반드시 return
                     } else {
-                        System.out.println("[WARN] 해당 ID의 공연이 존재하지 않음: " + id);
+                        System.out.println("[WARN] 예매 방식 설정할 공연이 선택되지 않았습니다.");
                     }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    request.setAttribute("errorMessage", "공연 등록 중 오류가 발생했습니다.");
-                }
+                    break;
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/performances");
+    }
+
+    private void handleSave(String[] selectedIds) {
+        for (String id : selectedIds) {
+            try {
+                PerformanceDTO performance = performanceService.getPerformanceById(id);
+                if (performance == null) continue;
+
+                performance.setAdminSelected(true);
+                if (performance.getPosterUrl() == null || performance.getPosterUrl().isEmpty()) {
+                    performance.setPosterUrl("https://default-image-path.com/default.jpg");
+                }
+
+                performanceDAO.savePerformance(performance);
+                System.out.println("[INFO] 공연 저장 완료: " + performance.getTitle());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void handleReservation(String[] selectedIds, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // 🔁 /reservation?selectedPerformances=id1&id2 형식으로 리다이렉트
+        StringBuilder redirectUrl = new StringBuilder(request.getContextPath() + "/reservation?");
+        for (int i = 0; i < selectedIds.length; i++) {
+            redirectUrl.append("selectedPerformances=").append(selectedIds[i]);
+            if (i < selectedIds.length - 1) redirectUrl.append("&");
+        }
+
+        System.out.println("[INFO] 예매 방식 관리 리다이렉트: " + redirectUrl);
+        response.sendRedirect(redirectUrl.toString());
     }
 }

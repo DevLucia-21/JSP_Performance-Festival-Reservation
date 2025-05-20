@@ -2,6 +2,10 @@ package com.perfortival.common.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class DBUtil {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/perfortival?useSSL=false&serverTimezone=UTC";
@@ -18,4 +22,15 @@ public class DBUtil {
         }
         return conn;
     }
+    
+    public static void close(ResultSet rs, PreparedStatement pstmt, Connection conn) {
+        try {
+            if (rs != null) rs.close();
+            if (pstmt != null) pstmt.close();
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
