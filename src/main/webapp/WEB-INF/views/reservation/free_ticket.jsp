@@ -2,7 +2,13 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %> 
 
-<h3>자유석 예매</h3>
+<!-- 상단 PerFortival -->
+<h1 style="font-size: 2rem; font-weight: bold; cursor: pointer;" onclick="location.href='<%= request.getContextPath() %>/main'">
+    PerFortival
+</h1>
+<hr>
+
+<h2>자유석 예매</h2>
 
 <table>
     <tr>
@@ -42,6 +48,12 @@
 <div style="margin-top: 1rem;">
     <p>선택 수량: <span id="selectedQty">1</span>장</p>
     <p>선택 일수: <span id="selectedDays">1일권</span></p>
+</div>
+
+<br><br>
+
+<div style="margin-top: 1rem;">
+        <button type="submit">선택 완료</button>
 </div>
 
 <!-- 가격 표시용 JS -->
