@@ -8,11 +8,12 @@
 
 <h2>좌석 선택 (좌석A: 콘서트장)</h2>
 
-<form action="${pageContext.request.contextPath}/reservation/confirm" method="post">
+<form action="${pageContext.request.contextPath}/payment" method="post">
     <input type="hidden" name="performanceId" value="${performance.id}" />
     <input type="hidden" name="date" value="${date}" />
     <input type="hidden" name="time" value="${time}" />
     <input type="hidden" name="selectedSeatId" id="selectedSeatInput" />
+    <input type="hidden" name="seatPrice" id="seatPriceInput" />
 
     <!-- 1층 VIP석 -->
 		<h3>1층 (VIP석)</h3>
@@ -179,10 +180,15 @@
                 if (btn.classList.contains('reserved')) return;
                 const seatLabel = btn.getAttribute('data-label');
                 const price = btn.getAttribute('data-price') || 0;
+                const seatPriceInput = document.getElementById('seatPriceInput');
                 selectedSeatEl.textContent = seatLabel;
                 seatPriceEl.textContent = parseInt(price).toLocaleString();
                 selectedSeatInput.value = btn.value;
+                seatPriceInput.value = price;
+
             });
         });
     });
 </script>
+
+

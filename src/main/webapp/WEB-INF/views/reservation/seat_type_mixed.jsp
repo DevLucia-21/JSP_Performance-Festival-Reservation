@@ -8,11 +8,12 @@
 
 <h2>좌석 선택 (혼합 공연장)</h2>
 
-<form action="${pageContext.request.contextPath}/reservation/confirm" method="post">
+<form action="${pageContext.request.contextPath}/payment" method="post">
     <input type="hidden" name="performanceId" value="${performance.id}" />
     <input type="hidden" name="date" value="${date}" />
     <input type="hidden" name="time" value="${time}" />
     <input type="hidden" name="selectedSeatId" id="selectedSeatInput" />
+    <input type="hidden" name="seatPrice" id="seatPriceInput" />
 
     <!-- 1층 스탠딩 -->
     <h3>1층 (스탠딩)</h3>
