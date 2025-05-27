@@ -65,11 +65,15 @@
            <form action="<%= request.getContextPath() %>/admin/performances" method="get" style="display: inline;">
                <input type="submit" value="공연 관리 페이지">
            </form>
+           &nbsp;&nbsp;
+           <form action="<%= request.getContextPath() %>/admin/reservationLogs" method="get" style="display: inline;">
+						    <input type="submit" value="예매 내역 페이지">
+						</form>
+           
         <%
            }
         %>
         <br>
-        <hr>
 
     <%
         } else {

@@ -1,5 +1,7 @@
 package com.perfortival.reservation.service;
 
+import java.util.List;
+
 import com.perfortival.performance.dao.SeatDAO;
 import com.perfortival.reservation.dao.ReservationDAO;
 import com.perfortival.reservation.dto.ReservationDTO;
@@ -25,5 +27,17 @@ public class ReservationService {
     // 자유석 예매 수량 조회
     public int getReservedFreeQuantity(String performanceId, String date, String time) {
         return reservationDAO.getReservedFreeQuantity(performanceId, date, time);
+    }
+    
+    public List<ReservationDTO> getReservationsByMemberId(String memberId) {
+        return reservationDAO.getReservationsByMemberId(memberId);
+    }
+    
+    public boolean cancelReservation(int reservationId) {
+        return reservationDAO.markReservationAsCancelled(reservationId);
+    }
+    
+    public List<ReservationDTO> getAllReservations() {
+        return reservationDAO.getAllReservations();
     }
 }

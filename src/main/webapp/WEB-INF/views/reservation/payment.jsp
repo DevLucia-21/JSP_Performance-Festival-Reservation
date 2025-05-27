@@ -12,7 +12,12 @@
 <p>공연명: ${performance.title}</p>
 <p>공연 날짜: ${date}</p>
 <p>공연 시간: ${time}</p>
-<p>좌석 번호: ${seatLabel}</p>
+<p>좌석 번호:
+    <c:choose>
+        <c:when test="${empty seatLabel}">자유석</c:when>
+        <c:otherwise>${seatLabel}</c:otherwise>
+    </c:choose>
+</p>
 <p>가격: <fmt:formatNumber value="${price}" pattern="#,###" /> 원</p>
 
 <hr>
@@ -40,6 +45,7 @@
     <input type="hidden" name="performanceId" value="${performance.id}">
     <input type="hidden" name="date" value="${date}">
     <input type="hidden" name="time" value="${time}">
+    <input type="hidden" name="days" value="${days}">
     <input type="hidden" name="seatId" value="${seatId}">
     <input type="hidden" name="price" value="${price}">
     

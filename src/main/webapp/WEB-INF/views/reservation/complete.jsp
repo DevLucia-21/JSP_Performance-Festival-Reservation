@@ -11,5 +11,5 @@
 <p><strong><fmt:formatNumber value="${price}" pattern="#,###" />원이 결제되었습니다.</strong></p>
 <p>카드 번호: ${maskedCardNumber}</p>
 <p>예매가 성공적으로 처리되었습니다.</p>
-
+<br><br>
 <a href="<%= request.getContextPath() %>/main">메인으로 돌아가기</a>

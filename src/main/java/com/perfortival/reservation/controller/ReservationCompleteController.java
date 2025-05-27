@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpSession;
 public class ReservationCompleteController extends HttpServlet {
 
     private ReservationService reservationService = new ReservationService();
+    ReservationDTO dto = new ReservationDTO();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -34,11 +35,18 @@ public class ReservationCompleteController extends HttpServlet {
         String performanceId = request.getParameter("performanceId");
         String date = request.getParameter("date");
         String time = request.getParameter("time");
-        int seatId = Integer.parseInt(request.getParameter("seatId"));
+        String daysStr = request.getParameter("days");
+        if (daysStr != null && !daysStr.isEmpty()) {
+            dto.setDays(Integer.parseInt(daysStr));
+        }
+        String seatIdStr = request.getParameter("seatId");
+        Integer seatId = null;
+        if (seatIdStr != null && !seatIdStr.isEmpty()) {
+            seatId = Integer.parseInt(seatIdStr);
+        }
         int price = Integer.parseInt(request.getParameter("price"));
         String cardNumber = request.getParameter("cardNumber");
 
-        ReservationDTO dto = new ReservationDTO();
         dto.setMemberId(loginUser.getId());
         dto.setPerformanceId(performanceId);
         dto.setReservationDate(date);

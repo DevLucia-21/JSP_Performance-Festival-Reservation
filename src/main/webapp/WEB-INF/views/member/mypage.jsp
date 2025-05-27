@@ -32,5 +32,11 @@
     <a href="<%= request.getContextPath() %>/member/update">회원 정보 수정</a> |
     <a href="<%= request.getContextPath() %>/member/withdraw">회원 탈퇴</a> |
     <a href="<%= request.getContextPath() %>/member/logout">로그아웃</a>
+    
+    <hr>
+    <h3 style="cursor: pointer; color: #3366cc;"
+		    onclick="location.href='<%= request.getContextPath() %>/member/reservationHistory'">
+		    ▶ 예매 내역 확인하기
+		</h3>
 </body>
 </html>

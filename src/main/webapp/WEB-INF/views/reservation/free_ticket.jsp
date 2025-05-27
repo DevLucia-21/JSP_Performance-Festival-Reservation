@@ -10,7 +10,7 @@
 
 <h2>자유석 예매</h2>
 
-<form action="${pageContext.request.contextPath}/payment" method="post">
+<form action="${pageContext.request.contextPath}/reservation/payment" method="post">
     <table>
         <tr>
             <td><label for="quantity">예매 수량:</label></td>
@@ -52,8 +52,10 @@
     </div>
 
     <!-- 🔽 공연 ID 같이 넘겨야 함 -->
+    <input type="hidden" name="date" value="${date}" />
+		<input type="hidden" name="time" value="${time}" />
     <input type="hidden" name="performanceId" value="${performance.id}" />
-    <input type="hidden" name="basePrice" value="${performance.basePrice}" />
+    <input type="hidden" name="seatPrice" value="${performance.basePrice}" />
 
     <br><br>
     <div style="margin-top: 1rem;">

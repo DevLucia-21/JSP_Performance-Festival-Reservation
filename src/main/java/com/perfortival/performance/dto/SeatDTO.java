@@ -129,4 +129,8 @@ public class SeatDTO {
     public void setReserved(boolean reserved) {
         isReserved = reserved;
     }
+    
+    public String getSeatLabel() {
+        return zone + "-" + row + col;
+    }
 }

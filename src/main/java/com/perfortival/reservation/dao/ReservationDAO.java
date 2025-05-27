@@ -3,7 +3,9 @@ package com.perfortival.reservation.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.perfortival.common.db.DBUtil;
@@ -119,4 +121,121 @@ public class ReservationDAO {
 
         return 0;
     }
-} 
+    
+    // 회원 ID로 예매 내역 조회
+    public List<ReservationDTO> getReservationsByMemberId(String memberId) {
+        List<ReservationDTO> list = new ArrayList<>();
+
+        String sql = "SELECT r.*, p.title AS performance_title, " +
+                "s.seat_id, s.zone, s.seat_type, " +
+                "s.row_label AS `row`, s.col_label AS col " +
+                "FROM reservations r " +
+                "JOIN performances p ON r.performance_id = p.id " +
+                "LEFT JOIN seats s ON r.seat_id = s.seat_id " +
+                "WHERE r.member_id = ? AND r.payment_status = '결제완료' " +
+                "ORDER BY r.reservation_date DESC, r.reservation_time DESC";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, memberId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                ReservationDTO dto = new ReservationDTO();
+                dto.setId(rs.getInt("id"));
+                dto.setPerformanceId(rs.getString("performance_id"));
+                dto.setMemberId(rs.getString("member_id"));
+                dto.setReservationDate(rs.getString("reservation_date"));
+                dto.setReservationTime(rs.getString("reservation_time"));
+                dto.setSeatId(rs.getObject("seat_id") != null ? rs.getInt("seat_id") : null);
+                dto.setQuantity(rs.getInt("quantity"));
+                dto.setDays(rs.getInt("days"));
+                dto.setPaymentStatus(rs.getString("payment_status"));
+                dto.setPerformanceTitle(rs.getString("performance_title"));
+
+                // 좌석 정보가 있으면 SeatDTO로 구성
+                if (dto.getSeatId() != null) {
+                    com.perfortival.performance.dto.SeatDTO seat = new com.perfortival.performance.dto.SeatDTO();
+                    seat.setSeatId(rs.getInt("seat_id"));
+                    seat.setZone(rs.getString("zone"));
+                    seat.setSeatType(rs.getString("seat_type"));
+                    seat.setRow(rs.getString("row"));
+                    seat.setCol(rs.getString("col"));
+
+                    dto.setSeat(seat);  // ✅ ReservationDTO에 set
+                }
+
+                list.add(dto);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+    
+    public boolean markReservationAsCancelled(int reservationId) {
+        String sql = "UPDATE reservations SET payment_status = '결제취소' WHERE id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, reservationId);
+            int result = pstmt.executeUpdate();
+            return result == 1;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public List<ReservationDTO> getAllReservations() {
+        List<ReservationDTO> list = new ArrayList<>();
+
+        String sql = "SELECT r.*, p.title AS performance_title, " +
+                "s.seat_id, s.zone, s.seat_type, s.row_label AS `row`, s.col_label AS col " +
+                "FROM reservations r " +
+                "JOIN performances p ON r.performance_id = p.id " +
+                "LEFT JOIN seats s ON r.seat_id = s.seat_id " +
+                "ORDER BY r.id ASC";  // 리스트 순서 유지
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                ReservationDTO dto = new ReservationDTO();
+                dto.setId(rs.getInt("id"));
+                dto.setPerformanceId(rs.getString("performance_id"));
+                dto.setMemberId(rs.getString("member_id"));
+                dto.setReservationDate(rs.getString("reservation_date"));
+                dto.setReservationTime(rs.getString("reservation_time"));
+                dto.setSeatId(rs.getObject("seat_id") != null ? rs.getInt("seat_id") : null);
+                dto.setQuantity(rs.getInt("quantity"));
+                dto.setDays(rs.getInt("days"));
+                dto.setPaymentStatus(rs.getString("payment_status"));
+                dto.setPerformanceTitle(rs.getString("performance_title"));
+
+                if (dto.getSeatId() != null) {
+                    com.perfortival.performance.dto.SeatDTO seat = new com.perfortival.performance.dto.SeatDTO();
+                    seat.setSeatId(rs.getInt("seat_id"));
+                    seat.setZone(rs.getString("zone"));
+                    seat.setSeatType(rs.getString("seat_type"));
+                    seat.setRow(rs.getString("row"));
+                    seat.setCol(rs.getString("col"));
+                    dto.setSeat(seat);
+                }
+
+                list.add(dto);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+}
