@@ -100,4 +100,54 @@ public class SeatDAO {
 	        e.printStackTrace();
 	    }
 	}
+	
+	public SeatDTO getSeatById(int seatId) {
+	    SeatDTO seat = null;
+
+	    String sql = "SELECT * FROM seats WHERE seat_id = ?";
+
+	    try (Connection conn = DBUtil.getConnection();
+	         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+	        pstmt.setInt(1, seatId);
+	        ResultSet rs = pstmt.executeQuery();
+
+	        if (rs.next()) {
+	            seat = new SeatDTO();
+	            seat.setSeatId(rs.getInt("seat_id"));
+	            seat.setPerformanceId(rs.getString("performance_id"));
+	            seat.setSeatType(rs.getString("seat_type"));
+	            seat.setSection(rs.getString("section"));
+	            seat.setZone(rs.getString("zone"));
+	            seat.setEntryNumber(rs.getInt("entry_number"));
+	            seat.setQuantity(rs.getInt("quantity"));
+	            seat.setPrice(rs.getInt("price"));
+	            seat.setStatus(rs.getString("status"));
+	            seat.setColor(rs.getString("color"));
+	            seat.setRow(rs.getString("row_label"));
+	            seat.setCol(rs.getString("col_label"));
+	            seat.setReserved("예약 불가".equals(rs.getString("status")));
+	            seat.setFloor("1층".equals(seat.getSection()) ? 1 : ("2층".equals(seat.getSection()) ? 2 : 0));
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return seat;
+	}
+	
+	public void markSeatAsReserved(int seatId) {
+	    String sql = "UPDATE seats SET status = '예약 불가' WHERE seat_id = ?";
+
+	    try (Connection conn = DBUtil.getConnection();
+	         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+	        pstmt.setInt(1, seatId);
+	        pstmt.executeUpdate();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
 }

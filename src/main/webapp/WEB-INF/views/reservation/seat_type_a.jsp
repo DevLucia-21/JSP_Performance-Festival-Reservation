@@ -8,73 +8,81 @@
 
 <h2>좌석 선택 (좌석A: 콘서트장)</h2>
 
-<form action="${pageContext.request.contextPath}/payment" method="post">
+<form action="${pageContext.request.contextPath}/reservation/step2" method="post">
     <input type="hidden" name="performanceId" value="${performance.id}" />
     <input type="hidden" name="date" value="${date}" />
     <input type="hidden" name="time" value="${time}" />
-    <input type="hidden" name="selectedSeatId" id="selectedSeatInput" />
+    <input type="hidden" name="seatId" id="selectedSeatInput" />
     <input type="hidden" name="seatPrice" id="seatPriceInput" />
 
     <!-- 1층 VIP석 -->
-		<h3>1층 (VIP석)</h3>
-		
-		<!-- A, B 구역 -->
-		<div class="seat-grid-center">
-		    <c:forEach var="zoneIndex" begin="0" end="1">
-		        <c:choose>
-		            <c:when test="${zoneIndex == 0}"><c:set var="zone" value="A"/></c:when>
-		            <c:when test="${zoneIndex == 1}"><c:set var="zone" value="B"/></c:when>
-		        </c:choose>
-		        <div class="zone-block">
-		            <c:forEach var="i" begin="1" end="4">
-		                <c:set var="matchedSeat" value="" />
-		                <c:forEach var="s" items="${seatList}">
-		                    <c:if test="${s.seatType eq 'VIP' and s.zone eq zone and s.row eq 'V' and s.col eq i}">
-		                        <c:set var="matchedSeat" value="${s}" />
-		                    </c:if>
-		                </c:forEach>
-		                <button
-		                    class="seat ${empty matchedSeat ? 'reserved' : 'vip'}"
-		                    type="button"
-		                    <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
-		                    data-label="${zone}-V${i}"
-		                    data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
-		                    <c:if test="${empty matchedSeat}">disabled</c:if>>
-		                    ${zone}-V${i}
-		                </button>
-		            </c:forEach>
-		        </div>
-		    </c:forEach>
-		</div>
-		
-		<!-- C, D 구역 -->
-		<div class="seat-grid-center">
-		    <c:forEach var="zoneIndex" begin="2" end="3">
-		        <c:choose>
-		            <c:when test="${zoneIndex == 2}"><c:set var="zone" value="C"/></c:when>
-		            <c:when test="${zoneIndex == 3}"><c:set var="zone" value="D"/></c:when>
-		        </c:choose>
-		        <div class="zone-block">
-		            <c:forEach var="i" begin="1" end="4">
-		                <c:set var="matchedSeat" value="" />
-		                <c:forEach var="s" items="${seatList}">
-		                    <c:if test="${s.seatType eq 'VIP' and s.zone eq zone and s.row eq 'V' and s.col eq i}">
-		                        <c:set var="matchedSeat" value="${s}" />
-		                    </c:if>
-		                </c:forEach>
-		                <button
-		                    class="seat ${empty matchedSeat ? 'reserved' : 'vip'}"
-		                    type="button"
-		                    <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
-		                    data-label="${zone}-V${i}"
-		                    data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
-		                    <c:if test="${empty matchedSeat}">disabled</c:if>>
-		                    ${zone}-V${i}
-		                </button>
-		            </c:forEach>
-		        </div>
-		    </c:forEach>
-		</div>
+    <h3>1층 (VIP석)</h3>
+
+    <!-- A, B 구역 -->
+    <div class="seat-grid-center">
+        <c:forEach var="zoneIndex" begin="0" end="1">
+            <c:choose>
+                <c:when test="${zoneIndex == 0}"><c:set var="zone" value="A"/></c:when>
+                <c:when test="${zoneIndex == 1}"><c:set var="zone" value="B"/></c:when>
+            </c:choose>
+            <div class="zone-block">
+                <c:forEach var="i" begin="1" end="4">
+                    <c:set var="matchedSeat" value="${null}" />
+                    <c:forEach var="s" items="${seatList}">
+                        <c:if test="${s.seatType eq 'VIP' and s.zone eq zone and s.row eq 'V' and s.col eq i}">
+                            <c:set var="matchedSeat" value="${s}" />
+                        </c:if>
+                    </c:forEach>
+                    <button
+                        class="seat 
+                            <c:choose>
+                                <c:when test="${empty matchedSeat or matchedSeat.reserved}">reserved</c:when>
+                                <c:otherwise>vip</c:otherwise>
+                            </c:choose>"
+                        type="button"
+                        <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
+                        data-label="${zone}-V${i}"
+                        data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
+                        <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
+                        ${zone}-V${i}
+                    </button>
+                </c:forEach>
+            </div>
+        </c:forEach>
+    </div>
+
+    <!-- C, D 구역 -->
+    <div class="seat-grid-center">
+        <c:forEach var="zoneIndex" begin="2" end="3">
+            <c:choose>
+                <c:when test="${zoneIndex == 2}"><c:set var="zone" value="C"/></c:when>
+                <c:when test="${zoneIndex == 3}"><c:set var="zone" value="D"/></c:when>
+            </c:choose>
+            <div class="zone-block">
+                <c:forEach var="i" begin="1" end="4">
+                    <c:set var="matchedSeat" value="${null}" />
+                    <c:forEach var="s" items="${seatList}">
+                        <c:if test="${s.seatType eq 'VIP' and s.zone eq zone and s.row eq 'V' and s.col eq i}">
+                            <c:set var="matchedSeat" value="${s}" />
+                        </c:if>
+                    </c:forEach>
+                    <button
+                        class="seat 
+                            <c:choose>
+                                <c:when test="${empty matchedSeat or matchedSeat.reserved}">reserved</c:when>
+                                <c:otherwise>vip</c:otherwise>
+                            </c:choose>"
+                        type="button"
+                        <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
+                        data-label="${zone}-V${i}"
+                        data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
+                        <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
+                        ${zone}-V${i}
+                    </button>
+                </c:forEach>
+            </div>
+        </c:forEach>
+    </div>
 
     <!-- 2층 일반석 -->
     <h3>2층 (일반석)</h3>
@@ -96,12 +104,16 @@
                         </c:if>
                     </c:forEach>
                     <button
-                        class="seat ${empty matchedSeat ? 'reserved' : 'normal'}"
+                        class="seat 
+                            <c:choose>
+                                <c:when test="${empty matchedSeat or matchedSeat.reserved}">reserved</c:when>
+                                <c:otherwise>normal</c:otherwise>
+                            </c:choose>"
                         type="button"
                         <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
                         data-label="${zone}-R${i}"
                         data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
-                        <c:if test="${empty matchedSeat}">disabled</c:if>>
+                        <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
                         ${zone}-R${i}
                     </button>
                 </c:forEach>
@@ -122,20 +134,20 @@
 
 <style>
     .seat-grid-start {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 40px;
-    justify-content: flex-start;
-		}
-		
-		.seat-grid-center {
-		    display: flex;
-		    gap: 20px;
-		    flex-wrap: wrap;
-		    margin-bottom: 40px;
-		    margin-left: 230px;
-		}
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
+        justify-content: flex-start;
+    }
+
+    .seat-grid-center {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        margin-left: 230px;
+    }
 
     .zone-block {
         display: grid;
@@ -174,21 +186,18 @@
         const selectedSeatEl = document.getElementById('selectedSeat');
         const seatPriceEl = document.getElementById('seatPrice');
         const selectedSeatInput = document.getElementById('selectedSeatInput');
+        const seatPriceInput = document.getElementById('seatPriceInput');
 
         seatButtons.forEach(btn => {
             btn.addEventListener('click', function () {
                 if (btn.classList.contains('reserved')) return;
                 const seatLabel = btn.getAttribute('data-label');
                 const price = btn.getAttribute('data-price') || 0;
-                const seatPriceInput = document.getElementById('seatPriceInput');
                 selectedSeatEl.textContent = seatLabel;
                 seatPriceEl.textContent = parseInt(price).toLocaleString();
                 selectedSeatInput.value = btn.value;
                 seatPriceInput.value = price;
-
             });
         });
     });
 </script>
-
-

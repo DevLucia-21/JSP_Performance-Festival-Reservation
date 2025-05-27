@@ -9,38 +9,62 @@
 
 <h2>좌석 선택 (좌석B: 뮤지컬/클래식 공연장)</h2>
 
-<form action="${pageContext.request.contextPath}/payment" method="post">
+<form action="${pageContext.request.contextPath}/reservation/step2" method="post">
     <input type="hidden" name="performanceId" value="${performance.id}" />
     <input type="hidden" name="date" value="${date}" />
     <input type="hidden" name="time" value="${time}" />
-    <input type="hidden" name="selectedSeatId" id="selectedSeatInput" />
+    <input type="hidden" name="seatId" id="selectedSeatInput" />
     <input type="hidden" name="seatPrice" id="seatPriceInput" />
 
     <!-- 1층 VIP석 -->
     <h3>1층 (VIP석)</h3>
     <div class="seat-grid-horizontal">
         <div class="row-block">
+            <c:set var="zone" value="A" />
             <c:forEach var="i" begin="1" end="6">
-                <c:set var="zone" value="A" />
                 <c:set var="matchedSeat" value="${null}" />
                 <c:forEach var="s" items="${seatList}">
                     <c:if test="${s.seatType eq 'VIP' and s.zone eq zone and s.row eq 'V' and s.col eq i}">
                         <c:set var="matchedSeat" value="${s}" />
                     </c:if>
                 </c:forEach>
-                <button class="seat ${empty matchedSeat ? 'reserved' : 'vip'}" type="button" value="${not empty matchedSeat ? matchedSeat.seatId : ''}" data-label="${zone}-V${i}" data-price="${not empty matchedSeat ? matchedSeat.price : 0}" <c:if test="${empty matchedSeat}">disabled</c:if>>${zone}-V${i}</button>
+                <button
+                    class="seat 
+                        <c:choose>
+                            <c:when test="${empty matchedSeat or matchedSeat.reserved}">reserved</c:when>
+                            <c:otherwise>vip</c:otherwise>
+                        </c:choose>"
+                    type="button"
+                    <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
+                    data-label="${zone}-V${i}"
+                    data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
+                    <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
+                    ${zone}-V${i}
+                </button>
             </c:forEach>
         </div>
         <div class="row-block">
+            <c:set var="zone" value="B" />
             <c:forEach var="i" begin="1" end="6">
-                <c:set var="zone" value="B" />
                 <c:set var="matchedSeat" value="${null}" />
                 <c:forEach var="s" items="${seatList}">
                     <c:if test="${s.seatType eq 'VIP' and s.zone eq zone and s.row eq 'V' and s.col eq i}">
                         <c:set var="matchedSeat" value="${s}" />
                     </c:if>
                 </c:forEach>
-                <button class="seat ${empty matchedSeat ? 'reserved' : 'vip'}" type="button" value="${not empty matchedSeat ? matchedSeat.seatId : ''}" data-label="${zone}-V${i}" data-price="${not empty matchedSeat ? matchedSeat.price : 0}" <c:if test="${empty matchedSeat}">disabled</c:if>>${zone}-V${i}</button>
+                <button
+                    class="seat 
+                        <c:choose>
+                            <c:when test="${empty matchedSeat or matchedSeat.reserved}">reserved</c:when>
+                            <c:otherwise>vip</c:otherwise>
+                        </c:choose>"
+                    type="button"
+                    <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
+                    data-label="${zone}-V${i}"
+                    data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
+                    <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
+                    ${zone}-V${i}
+                </button>
             </c:forEach>
         </div>
     </div>
@@ -49,27 +73,51 @@
     <h3>1층 (R석)</h3>
     <div class="seat-grid-horizontal">
         <div class="row-block">
+            <c:set var="zone" value="I" />
             <c:forEach var="i" begin="1" end="6">
-                <c:set var="zone" value="I" />
                 <c:set var="matchedSeat" value="${null}" />
                 <c:forEach var="s" items="${seatList}">
                     <c:if test="${s.seatType eq 'R석' and s.zone eq zone and s.row eq 'R' and s.col eq i}">
                         <c:set var="matchedSeat" value="${s}" />
                     </c:if>
                 </c:forEach>
-                <button class="seat ${empty matchedSeat ? 'reserved' : 'rgrade'}" type="button" value="${not empty matchedSeat ? matchedSeat.seatId : ''}" data-label="${zone}-R${i}" data-price="${not empty matchedSeat ? matchedSeat.price : 0}" <c:if test="${empty matchedSeat}">disabled</c:if>>${zone}-R${i}</button>
+                <button
+                    class="seat 
+                        <c:choose>
+                            <c:when test="${empty matchedSeat or matchedSeat.reserved}">reserved</c:when>
+                            <c:otherwise>rgrade</c:otherwise>
+                        </c:choose>"
+                    type="button"
+                    <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
+                    data-label="${zone}-R${i}"
+                    data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
+                    <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
+                    ${zone}-R${i}
+                </button>
             </c:forEach>
         </div>
         <div class="row-block">
+            <c:set var="zone" value="J" />
             <c:forEach var="i" begin="1" end="6">
-                <c:set var="zone" value="J" />
                 <c:set var="matchedSeat" value="${null}" />
                 <c:forEach var="s" items="${seatList}">
                     <c:if test="${s.seatType eq 'R석' and s.zone eq zone and s.row eq 'R' and s.col eq i}">
                         <c:set var="matchedSeat" value="${s}" />
                     </c:if>
                 </c:forEach>
-                <button class="seat ${empty matchedSeat ? 'reserved' : 'rgrade'}" type="button" value="${not empty matchedSeat ? matchedSeat.seatId : ''}" data-label="${zone}-R${i}" data-price="${not empty matchedSeat ? matchedSeat.price : 0}" <c:if test="${empty matchedSeat}">disabled</c:if>>${zone}-R${i}</button>
+                <button
+                    class="seat 
+                        <c:choose>
+                            <c:when test="${empty matchedSeat or matchedSeat.reserved}">reserved</c:when>
+                            <c:otherwise>rgrade</c:otherwise>
+                        </c:choose>"
+                    type="button"
+                    <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
+                    data-label="${zone}-R${i}"
+                    data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
+                    <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
+                    ${zone}-R${i}
+                </button>
             </c:forEach>
         </div>
     </div>
@@ -78,15 +126,27 @@
     <h3>2층 (R석)</h3>
     <div class="seat-grid-horizontal">
         <div class="row-block">
+            <c:set var="zone" value="K" />
             <c:forEach var="i" begin="1" end="6">
-                <c:set var="zone" value="K" />
                 <c:set var="matchedSeat" value="${null}" />
                 <c:forEach var="s" items="${seatList}">
                     <c:if test="${s.seatType eq 'R석' and s.zone eq zone and s.row eq 'R' and s.col eq i}">
                         <c:set var="matchedSeat" value="${s}" />
                     </c:if>
                 </c:forEach>
-                <button class="seat ${empty matchedSeat ? 'reserved' : 'rgrade'}" type="button" value="${not empty matchedSeat ? matchedSeat.seatId : ''}" data-label="${zone}-R${i}" data-price="${not empty matchedSeat ? matchedSeat.price : 0}" <c:if test="${empty matchedSeat}">disabled</c:if>>${zone}-R${i}</button>
+                <button
+                    class="seat 
+                        <c:choose>
+                            <c:when test="${empty matchedSeat or matchedSeat.reserved}">reserved</c:when>
+                            <c:otherwise>rgrade</c:otherwise>
+                        </c:choose>"
+                    type="button"
+                    <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
+                    data-label="${zone}-R${i}"
+                    data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
+                    <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
+                    ${zone}-R${i}
+                </button>
             </c:forEach>
         </div>
     </div>
@@ -95,40 +155,64 @@
     <h3>2층 (S석)</h3>
     <div class="seat-grid-horizontal">
         <div class="row-block">
+            <c:set var="zone" value="O" />
             <c:forEach var="i" begin="1" end="6">
-                <c:set var="zone" value="O" />
                 <c:set var="matchedSeat" value="${null}" />
                 <c:forEach var="s" items="${seatList}">
                     <c:if test="${s.seatType eq 'S석' and s.zone eq zone and s.row eq 'S' and s.col eq i}">
                         <c:set var="matchedSeat" value="${s}" />
                     </c:if>
                 </c:forEach>
-                <button class="seat ${empty matchedSeat ? 'reserved' : 'sgrade'}" type="button" value="${not empty matchedSeat ? matchedSeat.seatId : ''}" data-label="${zone}-S${i}" data-price="${not empty matchedSeat ? matchedSeat.price : 0}" <c:if test="${empty matchedSeat}">disabled</c:if>>${zone}-S${i}</button>
+                <button
+                    class="seat ${empty matchedSeat or matchedSeat.reserved ? 'reserved' : 'sgrade'}"
+                    type="button"
+                    <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
+                    data-label="${zone}-S${i}"
+                    data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
+                    <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
+                    ${zone}-S${i}
+                </button>
             </c:forEach>
         </div>
-        <br><br>
+        <br>
         <div class="row-block">
+            <c:set var="zone" value="P" />
             <c:forEach var="i" begin="1" end="6">
-                <c:set var="zone" value="P" />
                 <c:set var="matchedSeat" value="${null}" />
                 <c:forEach var="s" items="${seatList}">
                     <c:if test="${s.seatType eq 'S석' and s.zone eq zone and s.row eq 'S' and s.col eq i}">
                         <c:set var="matchedSeat" value="${s}" />
                     </c:if>
                 </c:forEach>
-                <button class="seat ${empty matchedSeat ? 'reserved' : 'sgrade'}" type="button" value="${not empty matchedSeat ? matchedSeat.seatId : ''}" data-label="${zone}-S${i}" data-price="${not empty matchedSeat ? matchedSeat.price : 0}" <c:if test="${empty matchedSeat}">disabled</c:if>>${zone}-S${i}</button>
+                <button
+                    class="seat ${empty matchedSeat or matchedSeat.reserved ? 'reserved' : 'sgrade'}"
+                    type="button"
+                    <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
+                    data-label="${zone}-S${i}"
+                    data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
+                    <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
+                    ${zone}-S${i}
+                </button>
             </c:forEach>
         </div>
         <div class="row-block">
+            <c:set var="zone" value="Q" />
             <c:forEach var="i" begin="1" end="6">
-                <c:set var="zone" value="Q" />
                 <c:set var="matchedSeat" value="${null}" />
                 <c:forEach var="s" items="${seatList}">
                     <c:if test="${s.seatType eq 'S석' and s.zone eq zone and s.row eq 'S' and s.col eq i}">
                         <c:set var="matchedSeat" value="${s}" />
                     </c:if>
                 </c:forEach>
-                <button class="seat ${empty matchedSeat ? 'reserved' : 'sgrade'}" type="button" value="${not empty matchedSeat ? matchedSeat.seatId : ''}" data-label="${zone}-S${i}" data-price="${not empty matchedSeat ? matchedSeat.price : 0}" <c:if test="${empty matchedSeat}">disabled</c:if>>${zone}-S${i}</button>
+                <button
+                    class="seat ${empty matchedSeat or matchedSeat.reserved ? 'reserved' : 'sgrade'}"
+                    type="button"
+                    <c:if test="${not empty matchedSeat}">value="${matchedSeat.seatId}"</c:if>
+                    data-label="${zone}-S${i}"
+                    data-price="${not empty matchedSeat ? matchedSeat.price : 0}"
+                    <c:if test="${empty matchedSeat or matchedSeat.reserved}">disabled</c:if>>
+                    ${zone}-S${i}
+                </button>
             </c:forEach>
         </div>
     </div>
@@ -158,13 +242,16 @@
     }
 
     .seat {
-        padding: 8px 12px;
-        font-weight: bold;
-        font-size: 16px;
-        border: 1px solid #999;
-        border-radius: 6px;
-        cursor: pointer;
-    }
+		    width: 64px; /* 고정 크기 */
+		    height: 40px;
+		    padding: 8px;
+		    font-weight: bold;
+		    font-size: 16px;
+		    border: 1px solid #999;
+		    border-radius: 6px;
+		    cursor: pointer;
+		    text-align: center;
+		}
 
     .vip {
         background-color: #A7C7E7;
@@ -190,13 +277,13 @@
         const selectedSeatEl = document.getElementById('selectedSeat');
         const seatPriceEl = document.getElementById('seatPrice');
         const selectedSeatInput = document.getElementById('selectedSeatInput');
+        const seatPriceInput = document.getElementById('seatPriceInput');
 
         seatButtons.forEach(btn => {
             btn.addEventListener('click', function () {
                 if (btn.classList.contains('reserved')) return;
                 const seatLabel = btn.getAttribute('data-label');
                 const price = btn.getAttribute('data-price') || 0;
-                const seatPriceInput = document.getElementById('seatPriceInput');
                 selectedSeatEl.textContent = seatLabel;
                 seatPriceEl.textContent = parseInt(price).toLocaleString();
                 selectedSeatInput.value = btn.value;

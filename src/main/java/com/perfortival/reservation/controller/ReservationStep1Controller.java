@@ -71,8 +71,8 @@ public class ReservationStep1Controller extends HttpServlet {
             return;
         }
 
-        // 💡 좌석 확장 방식으로 수정
-        List<SeatDTO> seatList = seatService.getExpandedSeatList(performanceId);
+        // 좌석 확장 방식으로 수정
+        List<SeatDTO> seatList = seatService.getSeatListWithReservation(performanceId, date, time);
         request.setAttribute("seatList", seatList);
 
         switch (reservationType) {

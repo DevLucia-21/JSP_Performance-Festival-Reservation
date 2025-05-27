@@ -2,9 +2,12 @@ package com.perfortival.reservation.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.perfortival.reservation.dto.ReservationDTO;
 import com.perfortival.common.db.DBUtil;
+import com.perfortival.reservation.dto.ReservationDTO;
 
 public class ReservationDAO {
 
@@ -39,5 +42,55 @@ public class ReservationDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    // 예매 중복 확인 메서드 추가
+    public boolean isDuplicateReservation(String memberId, String performanceId, String date, String time, int seatId) {
+        boolean isDuplicate = false;
+        String sql = "SELECT COUNT(*) FROM reservations " +
+                     "WHERE member_id = ? AND performance_id = ? AND reservation_date = ? AND reservation_time = ? AND seat_id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, memberId);
+            pstmt.setString(2, performanceId);
+            pstmt.setString(3, date);
+            pstmt.setString(4, time);
+            pstmt.setInt(5, seatId);
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                isDuplicate = rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return isDuplicate;
+    }
+    
+    public Set<Integer> getReservedSeatIds(String performanceId, String date, String time) {
+        Set<Integer> reservedSeatIds = new HashSet<>();
+
+        String sql = "SELECT seat_id FROM reservations " +
+                     "WHERE performance_id = ? AND reservation_date = ? AND reservation_time = ? AND seat_id IS NOT NULL";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, performanceId);
+            pstmt.setString(2, date);
+            pstmt.setString(3, time);
+
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                reservedSeatIds.add(rs.getInt("seat_id"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return reservedSeatIds;
     }
 }
