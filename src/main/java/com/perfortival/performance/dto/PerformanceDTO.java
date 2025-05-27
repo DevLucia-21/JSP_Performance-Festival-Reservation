@@ -10,6 +10,7 @@ public class PerformanceDTO {
     private String genre;
     private boolean adminSelected;  // 관리자 선택 여부
     private String posterUrl;       
+    private int basePrice;
 
     // 기본 생성자
     public PerformanceDTO() {}
@@ -89,5 +90,23 @@ public class PerformanceDTO {
 
     public void setPosterUrl(String posterUrl) {
         this.posterUrl = posterUrl;
+    }
+    
+    private String reservationType;
+
+    public String getReservationType() {
+        return reservationType;
+    }
+
+    public void setReservationType(String reservationType) {
+        this.reservationType = reservationType;
+    }
+
+    public int getBasePrice() {
+        return basePrice;
+    }
+
+    public void setBasePrice(int basePrice) {
+        this.basePrice = basePrice;
     }
 }

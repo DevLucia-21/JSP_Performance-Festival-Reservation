@@ -2,13 +2,13 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<h1>관리자 - 공연 관리</h1>
-
 <!-- 상단 PerFortival -->
 <h1 style="font-size: 2rem; font-weight: bold; cursor: pointer;" onclick="location.href='<%= request.getContextPath() %>/main'">
     PerFortival
 </h1>
 <hr>
+
+<h2>관리자 - 공연 관리</h2>
 
 <!-- 검색 폼 -->
 <form action="<%= request.getContextPath() %>/admin/performances" method="get">
@@ -60,7 +60,12 @@
 		    <button type="submit" name="action" value="save">선택한 공연 저장</button>
 		</form>
 		<hr>
-		<!-- 예매 방식 관리 버튼은 그냥 링크로 바꿔 -->
+		<!-- 예매 방식 관리 버튼 -->
 		<form action="<%= request.getContextPath() %>/reservation" method="get" style="margin-top: 10px;">
 		    <button type="submit">공연 예매 방식 관리</button>
+		</form>
+		<hr>
+		<!-- 공연 시간 등록 버튼 -->
+		<form action="${pageContext.request.contextPath}/admin/times" method="get" style="display:inline;">
+		    <button type="submit">공연 시간 등록</button>
 		</form>

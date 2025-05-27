@@ -1,5 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <!DOCTYPE html>
 <html>
@@ -29,6 +31,35 @@
             <p><strong>기간:</strong> ${performance.startDate} ~ ${performance.endDate}</p>
             <p><strong>장르:</strong> ${performance.genre}</p>
 
+            <!-- 예매 영역 시작 -->
+            <hr>
+            <h3>예매하기</h3>
+
+            <form method="post" action="${pageContext.request.contextPath}/reservation/step1">
+
+                <!-- 날짜 선택: dateList 사용 -->
+                <label>날짜:</label>
+                <select name="date" required>
+                    <c:forEach var="d" items="${dateList}">
+                        <option value="${d}">${d}</option>
+                    </c:forEach>
+                </select>
+                
+                <!-- 시간 선택 -->
+                <label>시간:</label>
+                <select name="time" required>
+                    <c:forEach var="t" items="${timeList}">
+                        <option value="${t.time}">${t.time}</option>
+                    </c:forEach>
+                </select>
+
+                <!-- 공연 ID 숨김 전달 -->
+                <input type="hidden" name="performanceId" value="${performance.id}" />
+
+                <br><br>
+                <button type="submit">예매하기</button>
+            </form>
+            <!-- 예매 영역 끝 -->
 
         </c:when>
         <c:otherwise>

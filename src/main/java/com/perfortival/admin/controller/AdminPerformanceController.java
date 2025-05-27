@@ -46,12 +46,7 @@ public class AdminPerformanceController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String[] selectedIds = request.getParameterValues("selectedPerformances");
         String action = request.getParameter("action");
-
-        // 🔍 디버깅 로그 필수
-        System.out.println("[DEBUG] doPost 진입");
-        System.out.println("[DEBUG] action = " + action);
-        System.out.println("[DEBUG] selectedIds = " + (selectedIds == null ? "null" : String.join(", ", selectedIds)));
-
+        
         if (action == null) {
             response.sendRedirect(request.getContextPath() + "/admin/performances");
             return;
@@ -100,7 +95,7 @@ public class AdminPerformanceController extends HttpServlet {
     }
 
     private void handleReservation(String[] selectedIds, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        // 🔁 /reservation?selectedPerformances=id1&id2 형식으로 리다이렉트
+        // /reservation?selectedPerformances=id1&id2 형식으로 리다이렉트
         StringBuilder redirectUrl = new StringBuilder(request.getContextPath() + "/reservation?");
         for (int i = 0; i < selectedIds.length; i++) {
             redirectUrl.append("selectedPerformances=").append(selectedIds[i]);

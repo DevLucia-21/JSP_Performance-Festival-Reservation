@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,12 +17,18 @@ import org.w3c.dom.NodeList;
 
 import com.perfortival.common.config.ConfigUtil;
 import com.perfortival.performance.dao.PerformanceDAO;
+import com.perfortival.performance.dao.PerformanceTimeDAO;
+import com.perfortival.performance.dao.SeatDAO;
 import com.perfortival.performance.dto.PerformanceDTO;
+import com.perfortival.performance.dto.PerformanceTimeDTO;
+import com.perfortival.performance.dto.SeatDTO;
 
 public class PerformanceService {
 
     private static final String API_URL = "http://kopis.or.kr/openApi/restful/pblprfr?";
     private PerformanceDAO performanceDAO = new PerformanceDAO();
+    private PerformanceTimeDAO timeDAO = new PerformanceTimeDAO();
+    private SeatDAO seatDAO = new SeatDAO(); 
 
     public List<PerformanceDTO> fetchPerformances(String keyword, String startDate, String endDate) {
         List<PerformanceDTO> performanceList = new ArrayList<>();
@@ -164,9 +171,188 @@ public class PerformanceService {
 
         return performance;
     }
-    
+
     public List<PerformanceDTO> getPerformancesByIds(String[] ids) {
         return performanceDAO.findByIds(ids);
     }
 
-}
+    public List<PerformanceTimeDTO> getTimesByPerformanceId(String performanceId) {
+        return timeDAO.getTimesByPerformanceId(performanceId);
+    }
+
+    public List<SeatDTO> getSeatsByPerformanceId(String performanceId) {
+        return new PerformanceDAO().getSeatsByPerformanceId(performanceId);
+    }
+    
+    public PerformanceDTO getPerformanceByIdFromDB(String id) {
+        PerformanceDTO performance = performanceDAO.getPerformanceById(id);
+
+        if (performance != null && "자유석".equals(performance.getReservationType())) {
+            Integer price = performanceDAO.getFreeSeatPrice(id); // 이건 DAO에 이미 만든 메서드
+            if (price != null) {
+                performance.setBasePrice(price);
+            }
+        }
+
+        return performance;
+    }
+    
+    public Integer getFreeSeatPrice(String performanceId) {
+        return performanceDAO.getFreeSeatPrice(performanceId);
+    }
+    
+    public void generateSeats(String performanceId, String reservationType, Map<String, Integer> priceMap) {
+        SeatDAO seatDAO = new SeatDAO();
+        seatDAO.deleteByPerformanceId(performanceId);
+
+        if ("좌석A".equals(reservationType)) {
+            // 1층 VIP석 (zone A~D, col: V1~V4)
+            for (char zone = 'A'; zone <= 'D'; zone++) {
+                for (int i = 1; i <= 4; i++) {
+                    SeatDTO seat = new SeatDTO();
+                    seat.setPerformanceId(performanceId);
+                    seat.setSeatType("VIP");
+                    seat.setFloor(1);
+                    seat.setSection("1층");
+                    seat.setZone(String.valueOf(zone));
+                    seat.setRow("V");           // row = A~D
+                    seat.setCol(String.valueOf(i));                       // col = V1~V4
+                    System.out.println("[DEBUG] zone=" + zone + ", row=" + seat.getRow() + ", col=" + seat.getCol());
+                    seat.setEntryNumber(i);
+                    seat.setPrice(priceMap.get("VIP"));
+                    seat.setColor("#0047AB");
+                    seat.setReserved(false);
+                    seatDAO.insertOrUpdate(seat);
+                }
+            }
+
+            // 2층 일반석 (zone I~M, col: R1~R4)
+            for (char zone = 'I'; zone <= 'M'; zone++) {
+                for (int i = 1; i <= 4; i++) {
+                    SeatDTO seat = new SeatDTO();
+                    seat.setPerformanceId(performanceId);
+                    seat.setSeatType("일반석");
+                    seat.setFloor(2);
+                    seat.setSection("2층");
+                    seat.setZone(String.valueOf(zone));
+                    seat.setRow("R");           
+                    seat.setCol(String.valueOf(i));                     
+                    seat.setEntryNumber(i);
+                    seat.setPrice(priceMap.get("일반석"));
+                    seat.setColor("#4682B4");
+                    seat.setReserved(false);
+                    seatDAO.insertOrUpdate(seat);
+                }
+            }
+
+        } if ("좌석B".equals(reservationType)) {
+            // 1층 - VIP석 (A1~6, B1~6)
+            for (String row : List.of("A", "B")) {
+                for (int col = 1; col <= 6; col++) {
+                    SeatDTO seat = new SeatDTO();
+                    seat.setPerformanceId(performanceId);
+                    seat.setFloor(1);
+                    seat.setZone(row);
+                    seat.setRow("V");
+                    seat.setCol(String.valueOf(col));
+                    seat.setSeatType("VIP");
+                    seat.setColor("#A7C7E7");
+                    seat.setPrice(priceMap.get("VIP"));
+                    seat.setReserved(false);
+                    seatDAO.insertOrUpdate(seat);
+                }
+            }
+
+            // 1층 - R석 (I1~6, J1~6)
+            for (String row : List.of("I", "J")) {
+                for (int col = 1; col <= 6; col++) {
+                    SeatDTO seat = new SeatDTO();
+                    seat.setPerformanceId(performanceId);
+                    seat.setFloor(1);
+                    seat.setZone(row);
+                    seat.setRow("R");
+                    seat.setCol(String.valueOf(col));
+                    seat.setSeatType("R석");
+                    seat.setColor("#D8B4F8");
+                    seat.setPrice(priceMap.get("R석"));
+                    seat.setReserved(false);
+                    seatDAO.insertOrUpdate(seat);
+                }
+            }
+
+            // 2층 - R석 (K1~6)
+            for (String row : List.of("K")) {
+                for (int col = 1; col <= 6; col++) {
+                    SeatDTO seat = new SeatDTO();
+                    seat.setPerformanceId(performanceId);
+                    seat.setFloor(2);
+                    seat.setZone(row);
+                    seat.setRow("R");
+                    seat.setCol(String.valueOf(col));
+                    seat.setSeatType("R석");
+                    seat.setColor("#D8B4F8");
+                    seat.setPrice(priceMap.get("R석"));
+                    seat.setReserved(false);
+                    seatDAO.insertOrUpdate(seat);
+                }
+            }
+
+            // 2층 - S석 (O1~6, P1~6, Q1~6)
+            for (String row : List.of("O", "P", "Q")) {
+                for (int col = 1; col <= 6; col++) {
+                    SeatDTO seat = new SeatDTO();
+                    seat.setPerformanceId(performanceId);
+                    seat.setFloor(2);
+                    seat.setZone(row);
+                    seat.setRow("S");
+                    seat.setCol(String.valueOf(col));
+                    seat.setSeatType("S석");
+                    seat.setColor("#F9F3A9");
+                    seat.setPrice(priceMap.get("S석"));
+                    seat.setReserved(false);
+                    seatDAO.insertOrUpdate(seat);
+                }
+            }
+
+        } else if ("혼합".equals(reservationType)) {
+            // 1층 - 스탠딩 (Zone A~D, T1~T4)
+            for (char zone = 'A'; zone <= 'D'; zone++) {
+                for (int i = 1; i <= 4; i++) {
+                    SeatDTO seat = new SeatDTO();
+                    seat.setPerformanceId(performanceId);
+                    seat.setSeatType("스탠딩");
+                    seat.setFloor(1);
+                    seat.setSection("1층");
+                    seat.setZone(String.valueOf(zone));
+                    seat.setRow("T"); // row = T
+                    seat.setCol(String.valueOf(i)); // col = 1~4
+                    seat.setEntryNumber(i);
+                    seat.setPrice(priceMap.get("스탠딩"));
+                    seat.setReserved(false);
+                    seat.setColor("#FFE5D0");
+                    seatDAO.insertOrUpdate(seat);
+                }
+            }
+
+            // 2층 - 지정석 (Zone I~J, R1~R6)
+            for (char zone = 'I'; zone <= 'J'; zone++) {
+                for (int i = 1; i <= 6; i++) {
+                    SeatDTO seat = new SeatDTO();
+                    seat.setPerformanceId(performanceId);
+                    seat.setSeatType("좌석");
+                    seat.setFloor(2);
+                    seat.setSection("2층");
+                    seat.setZone(String.valueOf(zone));
+                    seat.setRow("R");
+                    seat.setCol(String.valueOf(i)); // col = 1~6
+                    seat.setEntryNumber(i);
+                    seat.setPrice(priceMap.get("좌석"));
+                    seat.setReserved(false);
+                    seat.setColor("#D3F4C3");
+                    seatDAO.insertOrUpdate(seat);
+                }
+            }
+        }
+
+    }
+} 
