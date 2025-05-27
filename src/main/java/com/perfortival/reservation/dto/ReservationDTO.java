@@ -70,7 +70,18 @@ public class ReservationDTO {
     public Integer getDays() {
         return days;
     }
+    
     public void setDays(Integer days) {
         this.days = days;
+    }
+    
+    private String paymentStatus;
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+    
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 }

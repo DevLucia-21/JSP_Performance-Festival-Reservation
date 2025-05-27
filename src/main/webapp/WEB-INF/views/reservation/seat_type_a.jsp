@@ -178,26 +178,39 @@
         background-color: #ccc;
         cursor: not-allowed;
     }
+    
+    .selected-seat {
+		    background-color: #e6d3b3 !important; 
+		    border: 3px solid #a67c52 !important; 
+		}
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const seatButtons = document.querySelectorAll('.seat');
-        const selectedSeatEl = document.getElementById('selectedSeat');
-        const seatPriceEl = document.getElementById('seatPrice');
-        const selectedSeatInput = document.getElementById('selectedSeatInput');
-        const seatPriceInput = document.getElementById('seatPriceInput');
-
-        seatButtons.forEach(btn => {
-            btn.addEventListener('click', function () {
-                if (btn.classList.contains('reserved')) return;
-                const seatLabel = btn.getAttribute('data-label');
-                const price = btn.getAttribute('data-price') || 0;
-                selectedSeatEl.textContent = seatLabel;
-                seatPriceEl.textContent = parseInt(price).toLocaleString();
-                selectedSeatInput.value = btn.value;
-                seatPriceInput.value = price;
-            });
-        });
-    });
+		document.addEventListener('DOMContentLoaded', () => {
+		    const seatButtons = document.querySelectorAll('.seat');
+		    const selectedSeatEl = document.getElementById('selectedSeat');
+		    const seatPriceEl = document.getElementById('seatPrice');
+		    const selectedSeatInput = document.getElementById('selectedSeatInput');
+		    const seatPriceInput = document.getElementById('seatPriceInput');
+		
+		    seatButtons.forEach(btn => {
+		        btn.addEventListener('click', function () {
+		            if (btn.classList.contains('reserved')) return;
+		
+		            // 모든 좌석에서 선택 클래스 제거
+		            seatButtons.forEach(b => b.classList.remove('selected-seat'));
+		
+		            // 클릭한 좌석에 스타일 적용
+		            btn.classList.add('selected-seat');
+		
+		            const seatLabel = btn.getAttribute('data-label');
+		            const price = btn.getAttribute('data-price') || 0;
+		
+		            selectedSeatEl.textContent = seatLabel;
+		            seatPriceEl.textContent = parseInt(price).toLocaleString();
+		            selectedSeatInput.value = btn.value;
+		            seatPriceInput.value = price;
+		        });
+		    });
+		});
 </script>

@@ -21,4 +21,9 @@ public class ReservationService {
     public boolean isDuplicateReservation(String memberId, String performanceId, String date, String time, int seatId) {
         return reservationDAO.isDuplicateReservation(memberId, performanceId, date, time, seatId);
     }
+    
+    // 자유석 예매 수량 조회
+    public int getReservedFreeQuantity(String performanceId, String date, String time) {
+        return reservationDAO.getReservedFreeQuantity(performanceId, date, time);
+    }
 }

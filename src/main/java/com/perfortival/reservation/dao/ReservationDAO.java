@@ -12,9 +12,9 @@ import com.perfortival.reservation.dto.ReservationDTO;
 public class ReservationDAO {
 
     public boolean insertReservation(ReservationDTO dto) {
-        String sql = "INSERT INTO reservations " +
-                     "(performance_id, member_id, reservation_date, reservation_time, seat_id, quantity, days) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+    	String sql = "INSERT INTO reservations " +
+                "(performance_id, member_id, reservation_date, reservation_time, seat_id, quantity, days, payment_status) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -35,6 +35,8 @@ public class ReservationDAO {
             pstmt.setInt(6, dto.getQuantity() != null ? dto.getQuantity() : 1);
             pstmt.setInt(7, dto.getDays() != null ? dto.getDays() : 1);
 
+            pstmt.setString(8, dto.getPaymentStatus());
+            
             int result = pstmt.executeUpdate();
             return result == 1;
 
@@ -68,7 +70,7 @@ public class ReservationDAO {
         }
         return isDuplicate;
     }
-    
+
     public Set<Integer> getReservedSeatIds(String performanceId, String date, String time) {
         Set<Integer> reservedSeatIds = new HashSet<>();
 
@@ -93,4 +95,28 @@ public class ReservationDAO {
 
         return reservedSeatIds;
     }
-}
+
+    // 자유석 예매된 총 수량 구하는 메서드
+    public int getReservedFreeQuantity(String performanceId, String date, String time) {
+        String sql = "SELECT SUM(quantity) FROM reservations " +
+                     "WHERE performance_id = ? AND reservation_date = ? AND reservation_time = ? AND seat_id IS NULL";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, performanceId);
+            pstmt.setString(2, date);
+            pstmt.setString(3, time);
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);  // 합계 반환 (null이면 0으로 처리됨)
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+} 

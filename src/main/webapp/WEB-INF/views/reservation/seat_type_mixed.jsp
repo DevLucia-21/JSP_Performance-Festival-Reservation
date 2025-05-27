@@ -160,6 +160,12 @@
         background-color: #ccc;
         cursor: not-allowed;
     }
+    
+    .selected-seat {
+		    background-color: #e6d3b3 !important;
+		    border: 3px solid #a67c52 !important;
+		}
+    
 </style>
 
 <script>
@@ -168,16 +174,27 @@
         const selectedSeatEl = document.getElementById('selectedSeat');
         const seatPriceEl = document.getElementById('seatPrice');
         const selectedSeatInput = document.getElementById('selectedSeatInput');
+        const seatPriceInput = document.getElementById('seatPriceInput');
 
         seatButtons.forEach(btn => {
             btn.addEventListener('click', function () {
                 if (btn.classList.contains('reserved')) return;
+
+                // 모든 좌석 초기화
+                seatButtons.forEach(b => b.classList.remove('selected-seat'));
+
+                // 선택된 좌석만 강조
+                btn.classList.add('selected-seat');
+
                 const seatLabel = btn.getAttribute('data-label');
                 const price = btn.getAttribute('data-price') || 0;
+
                 selectedSeatEl.textContent = seatLabel;
                 seatPriceEl.textContent = parseInt(price).toLocaleString();
                 selectedSeatInput.value = btn.value;
+                seatPriceInput.value = price;
             });
         });
     });
 </script>
+

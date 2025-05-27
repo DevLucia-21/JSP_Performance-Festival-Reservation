@@ -35,21 +35,32 @@ public class ReservationCompleteController extends HttpServlet {
         String date = request.getParameter("date");
         String time = request.getParameter("time");
         int seatId = Integer.parseInt(request.getParameter("seatId"));
+        int price = Integer.parseInt(request.getParameter("price"));
+        String cardNumber = request.getParameter("cardNumber");
 
         ReservationDTO dto = new ReservationDTO();
         dto.setMemberId(loginUser.getId());
         dto.setPerformanceId(performanceId);
         dto.setReservationDate(date);
         dto.setReservationTime(time);
-        dto.setSeatId(seatId); // 자유석이면 null로 대체
+        dto.setSeatId(seatId);
+        dto.setPaymentStatus("결제완료");
 
         boolean result = reservationService.reserve(dto);
 
         if (result) {
+            String maskedCardNumber = maskCardNumber(cardNumber);
+            request.setAttribute("price", price);
+            request.setAttribute("maskedCardNumber", maskedCardNumber);
             request.getRequestDispatcher("/WEB-INF/views/reservation/complete.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "예매에 실패했습니다.");
             request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
         }
+    }
+
+    private String maskCardNumber(String cardNumber) {
+        if (cardNumber == null || cardNumber.length() < 4) return "****-****-****-****";
+        return "****-****-****-" + cardNumber.substring(cardNumber.length() - 4);
     }
 }
