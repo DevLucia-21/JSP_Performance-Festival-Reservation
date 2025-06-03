@@ -95,10 +95,16 @@
     <hr>
     <h2>주요 기능</h2>
         
+    <div>
     <!-- 공연 조회 버튼 -->
-    <form action="<%= request.getContextPath() %>/performances/search" method="get" style="margin-bottom: 10px;">
-        <input type="submit" value="공연 조회">
-    </form>
+	    <form action="<%= request.getContextPath() %>/performances/search" method="get" style="display: inline;">
+	        <input type="submit" value="공연 조회">
+	    </form>
+	    &nbsp;
+	    <form action="<%= request.getContextPath() %>/review/list" method="get" style="display: inline;">
+	        <input type="submit" value="공연 후기 게시판">
+       </form>
+    </div>
     <hr>
 
     <h2>공연 목록</h2>

@@ -8,7 +8,6 @@
 <hr>
 
 <h2>전체 예매 로그</h2>
-<hr>
 
 <table border="1" cellpadding="8" cellspacing="0">
     <thead>

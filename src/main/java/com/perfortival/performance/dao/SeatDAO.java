@@ -126,7 +126,7 @@ public class SeatDAO {
 	            seat.setColor(rs.getString("color"));
 	            seat.setRow(rs.getString("row_label"));
 	            seat.setCol(rs.getString("col_label"));
-	            seat.setReserved("예약 불가".equals(rs.getString("status")));
+	            seat.setReserved("예매 불가".equals(rs.getString("status")));
 	            seat.setFloor("1층".equals(seat.getSection()) ? 1 : ("2층".equals(seat.getSection()) ? 2 : 0));
 	        }
 

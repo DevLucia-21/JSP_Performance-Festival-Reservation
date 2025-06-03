@@ -145,7 +145,7 @@ public class PerformanceDAO {
 
         String query = "SELECT id, title, start_date, end_date, location, genre, poster_url, reservation_type " +
                        "FROM performances " +
-                       "WHERE admin_selected = TRUE AND start_date >= CURDATE() " +
+                       "WHERE admin_selected = TRUE AND end_date >= CURDATE() " +
                        "ORDER BY start_date ASC";
 
         try (Connection conn = DBUtil.getConnection();
@@ -161,7 +161,7 @@ public class PerformanceDAO {
                 p.setLocation(rs.getString("location"));
                 p.setGenre(rs.getString("genre"));
                 p.setPosterUrl(rs.getString("poster_url"));
-                p.setReservationType(rs.getString("reservation_type")); // 🔧 추가
+                p.setReservationType(rs.getString("reservation_type")); 
                 performances.add(p);
             }
 
@@ -230,7 +230,7 @@ public class PerformanceDAO {
                 p.setLocation(rs.getString("location"));
                 p.setGenre(rs.getString("genre"));
                 p.setPosterUrl(rs.getString("poster_url"));
-                p.setReservationType(rs.getString("reservation_type")); // 🔧 추가
+                p.setReservationType(rs.getString("reservation_type")); 
                 list.add(p);
             }
 
