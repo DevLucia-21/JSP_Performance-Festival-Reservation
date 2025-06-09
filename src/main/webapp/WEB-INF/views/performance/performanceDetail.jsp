@@ -2,6 +2,15 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Date" %>
+
+<%
+    // 오늘 날짜 구하기 (yyyy-MM-dd 형식)
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    String today = sdf.format(new Date());
+    request.setAttribute("todayStr", today); // JSTL에서 비교할 수 있게 넘김
+%>
 
 <!DOCTYPE html>
 <html>
@@ -47,39 +56,44 @@
             <hr>
             <h3>예매하기</h3>
 
-            <form method="post" action="${pageContext.request.contextPath}/reservation/step1">
-
-                <!-- 날짜 선택: dateList 사용 -->
-                <label>날짜:</label>
-                <select name="date" required>
-                    <c:forEach var="d" items="${dateList}">
-                        <option value="${d}">${d}</option>
-                    </c:forEach>
-                </select>
-                
-                <!-- 시간 선택 -->
-                <label>시간:</label>
-                <select name="time" required>
-                    <c:forEach var="t" items="${timeList}">
-                        <option value="${t.time}">${t.time}</option>
-                    </c:forEach>
-                </select>
-                
-                <!-- 자유석이 아닐 경우에만 수량 선택 -->
-                <c:if test="${performance.reservationType ne '자유석'}">
-                    <label>수량:</label>
-                    <select name="quantity" required>
-                        <option value="1">1장</option>
-                        <option value="2">2장</option>
-                    </select>
-                </c:if>
-                
-                <!-- 공연 ID 숨김 전달 -->
-                <input type="hidden" name="performanceId" value="${performance.id}" />
-
-                <br><br>
-                <button type="submit">예매하기</button>
-            </form>
+            <c:choose>
+                <c:when test="${performance.endDate lt todayStr}">
+                    <p style="color: gray; font-weight: bold;">이 공연은 종료되어 예매할 수 없습니다.</p>
+                </c:when>
+                <c:otherwise>
+                    <form method="post" action="${pageContext.request.contextPath}/reservation/step1">
+                        <!-- 날짜 선택 -->
+                        <label>날짜:</label>
+                        <select name="date" required>
+                            <c:forEach var="d" items="${dateList}">
+                                <option value="${d}">${d}</option>
+                            </c:forEach>
+                        </select>
+                        
+                        <!-- 시간 선택 -->
+                        <label>시간:</label>
+                        <select name="time" required>
+                            <c:forEach var="t" items="${timeList}">
+                                <option value="${t.time}">${t.time}</option>
+                            </c:forEach>
+                        </select>
+                        
+                        <!-- 자유석이 아닐 경우에만 수량 선택 -->
+                        <c:if test="${performance.reservationType ne '자유석'}">
+                            <label>수량:</label>
+                            <select name="quantity" required>
+                                <option value="1">1장</option>
+                                <option value="2">2장</option>
+                            </select>
+                        </c:if>
+                        
+                        <!-- 공연 ID -->
+                        <input type="hidden" name="performanceId" value="${performance.id}" />
+                        <br><br>
+                        <button type="submit">예매하기</button>
+                    </form>
+                </c:otherwise>
+            </c:choose>
             <!-- 예매 영역 끝 -->
 
         </c:when>
