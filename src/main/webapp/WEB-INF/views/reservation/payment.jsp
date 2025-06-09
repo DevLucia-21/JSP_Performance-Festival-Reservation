@@ -12,19 +12,22 @@
 <p>공연명: ${performance.title}</p>
 <p>공연 날짜: ${date}</p>
 <p>공연 시간: ${time}</p>
-<p>좌석 번호:
-    <c:choose>
-        <c:when test="${empty seatLabel}">자유석</c:when>
-        <c:otherwise>${seatLabel}</c:otherwise>
-    </c:choose>
-</p>
-<p>가격: <fmt:formatNumber value="${price}" pattern="#,###" /> 원</p>
+
+<c:if test="${not empty selectedSeats}">
+    <p>좌석 번호:
+        <c:forEach var="seat" items="${selectedSeats}" varStatus="loop">
+            ${seat.zone}-${seat.row}${seat.col}<c:if test="${!loop.last}">, </c:if>
+        </c:forEach>
+    </p>
+</c:if>
+
+<p>총 가격: <fmt:formatNumber value="${totalPrice}" pattern="#,###" /> 원</p>
 
 <hr>
 
 <h3>결제 정보 입력 (가상)</h3>
 
-<form action="${pageContext.request.contextPath}/reservation/complete" method="post">
+<form id="paymentForm" action="${pageContext.request.contextPath}/reservation/complete" method="post">
     <div style="margin-bottom: 10px;">
         <label>카드번호:</label>
         <input type="password" name="cardNumber" id="cardNumber" maxlength="19" required placeholder="1111-2222-3333-4444">
@@ -42,18 +45,22 @@
         <button type="button" onclick="toggleVisibility('cvc', this)">👁</button>
     </div>
 
+    <!-- 전달용 데이터 -->
     <input type="hidden" name="performanceId" value="${performance.id}">
     <input type="hidden" name="date" value="${date}">
     <input type="hidden" name="time" value="${time}">
-    <input type="hidden" name="days" value="${days}">
-    <input type="hidden" name="seatId" value="${seatId}">
-    <input type="hidden" name="price" value="${price}">
+    <input type="hidden" name="quantity" value="${quantity}">
+		<input type="hidden" name="days" value="${days}">
+    <input type="hidden" name="totalPrice" value="${totalPrice}">
     
+    <c:forEach var="seat" items="${selectedSeats}">
+		    <input type="hidden" name="seatId" value="${seat.seatId}">
+		</c:forEach>
+
     <button type="submit">결제 및 예매 완료</button>
 </form>
 
 <script>
-  // 카드번호 자동 하이픈
   document.getElementById("cardNumber").addEventListener("input", function(e) {
     let value = e.target.value.replace(/[^0-9]/g, '');
     if (value.length > 16) value = value.slice(0, 16);
@@ -61,7 +68,6 @@
     e.target.value = formatted ? formatted.join('-') : '';
   });
 
-  // 유효기간 자동 슬래시
   document.getElementById("expiry").addEventListener("input", function(e) {
     let value = e.target.value.replace(/[^0-9]/g, '');
     if (value.length > 4) value = value.slice(0, 4);
@@ -70,14 +76,12 @@
       : value;
   });
 
-  // CVC 숫자만 3자리 제한
   document.getElementById("cvc").addEventListener("input", function(e) {
     let value = e.target.value.replace(/[^0-9]/g, '');
     if (value.length > 3) value = value.slice(0, 3);
     e.target.value = value;
   });
 
-  // 보기/숨기기 토글
   function toggleVisibility(fieldId, button) {
     const input = document.getElementById(fieldId);
     if (input.type === "password") {
@@ -88,4 +92,13 @@
       button.textContent = "🔒";
     }
   }
+  
+  document.getElementById("paymentForm").addEventListener("submit", function(e) {
+	    const hasSeat = document.querySelector('input[name="seatId"]') !== null;
+	    if (hasSeat) {
+	      this.action = "${pageContext.request.contextPath}/reservation/complete";
+	    } else {
+	      this.action = "${pageContext.request.contextPath}/reservation/free/complete";
+	    }
+	  });
 </script>

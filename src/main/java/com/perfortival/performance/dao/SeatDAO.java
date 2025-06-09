@@ -150,4 +150,19 @@ public class SeatDAO {
 	        e.printStackTrace();
 	    }
 	}
+	
+	public void markSeatAsAvailable(int seatId) {
+	    String sql = "UPDATE seats SET status = '예약 가능' WHERE seat_id = ?";
+	    try (Connection conn = DBUtil.getConnection();
+	         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+	        pstmt.setInt(1, seatId);
+	        int affected = pstmt.executeUpdate();
+
+	        System.out.println("[DEBUG] 예약 가능으로 복구된 좌석 수: " + affected);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();  
+	    }
+	}
 }

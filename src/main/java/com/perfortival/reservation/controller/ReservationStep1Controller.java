@@ -55,6 +55,18 @@ public class ReservationStep1Controller extends HttpServlet {
         request.setAttribute("performance", performance);
         request.setAttribute("date", date);
         request.setAttribute("time", time);
+        
+        String quantityStr = request.getParameter("quantity");
+        int quantity = 1;
+        try {
+            quantity = Integer.parseInt(quantityStr);
+            if (quantity < 1 || quantity > 2) {
+                quantity = 1; // 기본값 보정
+            }
+        } catch (NumberFormatException e) {
+            quantity = 1;
+        }
+        request.setAttribute("quantity", quantity);
 
         if ("자유석".equals(reservationType)) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

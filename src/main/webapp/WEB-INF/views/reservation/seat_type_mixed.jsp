@@ -12,8 +12,10 @@
     <input type="hidden" name="performanceId" value="${performance.id}" />
     <input type="hidden" name="date" value="${date}" />
     <input type="hidden" name="time" value="${time}" />
-    <input type="hidden" name="seatId" id="selectedSeatInput" />
-    <input type="hidden" name="seatPrice" id="seatPriceInput" />
+    <input type="hidden" name="quantity" value="${quantity}" />
+		<input type="hidden" name="seatIds" id="selectedSeatInput" />
+		<input type="hidden" name="seatPrices" id="seatPriceInput" />
+		<div id="dynamicSeatInputs"></div>
 
     <!-- 1층 스탠딩 -->
 		<h3>1층 (스탠딩)</h3>
@@ -169,32 +171,64 @@
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const seatButtons = document.querySelectorAll('.seat');
-        const selectedSeatEl = document.getElementById('selectedSeat');
-        const seatPriceEl = document.getElementById('seatPrice');
-        const selectedSeatInput = document.getElementById('selectedSeatInput');
-        const seatPriceInput = document.getElementById('seatPriceInput');
+document.addEventListener('DOMContentLoaded', () => {
+    const seatButtons = document.querySelectorAll('.seat');
+    const selectedSeatEl = document.getElementById('selectedSeat');
+    const seatPriceEl = document.getElementById('seatPrice');
+    const selectedSeatInput = document.getElementById('selectedSeatInput');
+    const seatPriceInput = document.getElementById('seatPriceInput');
+    const dynamicSeatInputs = document.getElementById('dynamicSeatInputs');
 
-        seatButtons.forEach(btn => {
-            btn.addEventListener('click', function () {
-                if (btn.classList.contains('reserved')) return;
+    const maxQuantity = parseInt("${quantity}");
+    let selectedSeats = [];
 
-                // 모든 좌석 초기화
-                seatButtons.forEach(b => b.classList.remove('selected-seat'));
+    seatButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (btn.classList.contains('reserved')) return;
 
-                // 선택된 좌석만 강조
+            const seatId = btn.value;
+            const seatLabel = btn.getAttribute('data-label');
+            const price = btn.getAttribute('data-price') || 0;
+
+            const existingIndex = selectedSeats.findIndex(s => s.id === seatId);
+            if (existingIndex !== -1) {
+                selectedSeats.splice(existingIndex, 1);
+                btn.classList.remove('selected-seat');
+            } else {
+                if (selectedSeats.length >= maxQuantity) {
+                		alert(`선택한 수량에 맞게 좌석을 선택하세요.`);
+                    return;
+                }
+                selectedSeats.push({ id: seatId, label: seatLabel, price: price });
                 btn.classList.add('selected-seat');
+            }
 
-                const seatLabel = btn.getAttribute('data-label');
-                const price = btn.getAttribute('data-price') || 0;
+            if (selectedSeats.length === 0) {
+                selectedSeatEl.textContent = "없음";
+                seatPriceEl.textContent = "0";
+                selectedSeatInput.value = "";
+                seatPriceInput.value = "";
+            } else {
+                const labels = selectedSeats.map(s => s.label).join(', ');
+                const total = selectedSeats.reduce((sum, s) => sum + parseInt(s.price), 0);
 
-                selectedSeatEl.textContent = seatLabel;
-                seatPriceEl.textContent = parseInt(price).toLocaleString();
-                selectedSeatInput.value = btn.value;
-                seatPriceInput.value = price;
-            });
+                selectedSeatEl.textContent = labels;
+                seatPriceEl.textContent = total.toLocaleString();
+                selectedSeatInput.value = selectedSeats.map(s => s.id).join(',');
+                seatPriceInput.value = selectedSeats.map(s => s.price).join(',');
+
+                // 동적 input 추가
+                dynamicSeatInputs.innerHTML = "";
+                selectedSeats.forEach(s => {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "seatId";
+                    input.value = s.id;
+                    dynamicSeatInputs.appendChild(input);
+                });
+            }
         });
     });
+});
 </script>
 

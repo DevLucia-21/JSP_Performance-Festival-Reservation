@@ -12,8 +12,9 @@
     <input type="hidden" name="performanceId" value="${performance.id}" />
     <input type="hidden" name="date" value="${date}" />
     <input type="hidden" name="time" value="${time}" />
-    <input type="hidden" name="seatId" id="selectedSeatInput" />
-    <input type="hidden" name="seatPrice" id="seatPriceInput" />
+    <input type="hidden" name="quantity" value="${quantity}" />
+    <input type="hidden" name="seatIds" id="selectedSeatInput" />
+		<input type="hidden" name="seatPrices" id="seatPriceInput" />
 
     <!-- 1층 VIP석 -->
     <h3>1층 (VIP석)</h3>
@@ -126,6 +127,8 @@
         <p>선택한 좌석: <span id="selectedSeat">없음</span></p>
         <p>가격: <span id="seatPrice">0</span>원</p>
     </div>
+    
+    <div id="dynamicSeatInputs"></div>
 
     <div style="margin-top: 1rem;">
         <button type="submit">선택 완료</button>
@@ -140,7 +143,6 @@
         margin-bottom: 40px;
         justify-content: flex-start;
     }
-
     .seat-grid-center {
         display: flex;
         gap: 20px;
@@ -148,7 +150,6 @@
         margin-bottom: 20px;
         margin-left: 230px;
     }
-
     .zone-block {
         display: grid;
         grid-template-columns: repeat(2, auto);
@@ -157,7 +158,6 @@
         padding: 12px;
         border-radius: 10px;
     }
-
     .seat {
         padding: 8px 12px;
         font-weight: bold;
@@ -165,52 +165,74 @@
         border-radius: 6px;
         cursor: pointer;
     }
-
-    .vip {
-        background-color: #A7C7E7;
-    }
-
-    .normal {
-        background-color: #D3F4C3;
-    }
-
+    .vip { background-color: #A7C7E7; }
+    .normal { background-color: #D3F4C3; }
     .reserved {
         background-color: #ccc;
         cursor: not-allowed;
     }
-    
     .selected-seat {
-		    background-color: #e6d3b3 !important; 
-		    border: 3px solid #a67c52 !important; 
-		}
+        background-color: #e6d3b3 !important;
+        border: 3px solid #a67c52 !important;
+    }
 </style>
 
 <script>
-		document.addEventListener('DOMContentLoaded', () => {
-		    const seatButtons = document.querySelectorAll('.seat');
-		    const selectedSeatEl = document.getElementById('selectedSeat');
-		    const seatPriceEl = document.getElementById('seatPrice');
-		    const selectedSeatInput = document.getElementById('selectedSeatInput');
-		    const seatPriceInput = document.getElementById('seatPriceInput');
-		
-		    seatButtons.forEach(btn => {
-		        btn.addEventListener('click', function () {
-		            if (btn.classList.contains('reserved')) return;
-		
-		            // 모든 좌석에서 선택 클래스 제거
-		            seatButtons.forEach(b => b.classList.remove('selected-seat'));
-		
-		            // 클릭한 좌석에 스타일 적용
-		            btn.classList.add('selected-seat');
-		
-		            const seatLabel = btn.getAttribute('data-label');
-		            const price = btn.getAttribute('data-price') || 0;
-		
-		            selectedSeatEl.textContent = seatLabel;
-		            seatPriceEl.textContent = parseInt(price).toLocaleString();
-		            selectedSeatInput.value = btn.value;
-		            seatPriceInput.value = price;
-		        });
-		    });
-		});
+    document.addEventListener('DOMContentLoaded', () => {
+        const seatButtons = document.querySelectorAll('.seat');
+        const selectedSeatEl = document.getElementById('selectedSeat');
+        const seatPriceEl = document.getElementById('seatPrice');
+        const selectedSeatInput = document.getElementById('selectedSeatInput');
+        const seatPriceInput = document.getElementById('seatPriceInput');
+
+        const maxQuantity = parseInt("${quantity}");
+        let selectedSeats = [];
+
+        seatButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                if (btn.classList.contains('reserved')) return;
+
+                const seatId = btn.value;
+                const seatLabel = btn.getAttribute('data-label');
+                const price = btn.getAttribute('data-price') || 0;
+
+                const existingIndex = selectedSeats.findIndex(s => s.id === seatId);
+                if (existingIndex !== -1) {
+                    selectedSeats.splice(existingIndex, 1);
+                    btn.classList.remove('selected-seat');
+                } else {
+                    if (selectedSeats.length >= maxQuantity) {
+                    		alert(`선택한 수량에 맞게 좌석을 선택하세요.`);
+                        return;
+                    }
+                    selectedSeats.push({ id: seatId, label: seatLabel, price: price });
+                    btn.classList.add('selected-seat');
+                }
+
+                if (selectedSeats.length === 0) {
+                    selectedSeatEl.textContent = "없음";
+                    seatPriceEl.textContent = "0";
+                    selectedSeatInput.value = "";
+                    seatPriceInput.value = "";
+                } else {
+                    const labels = selectedSeats.map(s => s.label).join(', ');
+                    const total = selectedSeats.reduce((sum, s) => sum + parseInt(s.price), 0);
+
+                    selectedSeatEl.textContent = labels;
+                    seatPriceEl.textContent = total.toLocaleString();
+                    selectedSeatInput.value = selectedSeats.map(s => s.id).join(',');
+                    seatPriceInput.value = selectedSeats.map(s => s.price).join(',');
+                    
+                    dynamicSeatInputs.innerHTML = "";
+                    selectedSeats.forEach(s => {
+                        const input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "seatId";
+                        input.value = s.id;
+                        dynamicSeatInputs.appendChild(input);
+                    });
+                }
+            });
+        });
+    });
 </script>

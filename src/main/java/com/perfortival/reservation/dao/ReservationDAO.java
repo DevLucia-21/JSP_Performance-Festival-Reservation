@@ -13,40 +13,50 @@ import com.perfortival.reservation.dto.ReservationDTO;
 
 public class ReservationDAO {
 
-    public boolean insertReservation(ReservationDTO dto) {
-    	String sql = "INSERT INTO reservations " +
-                "(performance_id, member_id, reservation_date, reservation_time, seat_id, quantity, days, payment_status) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+	public boolean insertReservation(ReservationDTO dto) {
+	    System.out.println("[DEBUG] insertReservation() 호출됨");
+	    System.out.println(" - memberId: " + dto.getMemberId());
+	    System.out.println(" - performanceId: " + dto.getPerformanceId());
+	    System.out.println(" - date/time: " + dto.getReservationDate() + " " + dto.getReservationTime());
+	    System.out.println(" - seatId: " + dto.getSeatId());
+	    System.out.println(" - quantity: " + dto.getQuantity());
+	    System.out.println(" - days: " + dto.getDays());
+	    System.out.println(" - paymentStatus: " + dto.getPaymentStatus());
 
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+	    String sql = "INSERT INTO reservations " +
+	        "(performance_id, member_id, reservation_date, reservation_time, seat_id, quantity, days, payment_status) " +
+	        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-            pstmt.setString(1, dto.getPerformanceId());
-            pstmt.setString(2, dto.getMemberId());
-            pstmt.setString(3, dto.getReservationDate());
-            pstmt.setString(4, dto.getReservationTime());
+	    try (Connection conn = DBUtil.getConnection();
+	         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            // 좌석형이라면 seatId, 자유석이면 null
-            if (dto.getSeatId() != null) {
-                pstmt.setInt(5, dto.getSeatId());
-            } else {
-                pstmt.setNull(5, java.sql.Types.INTEGER);
-            }
+	        pstmt.setString(1, dto.getPerformanceId());
+	        pstmt.setString(2, dto.getMemberId());
+	        pstmt.setString(3, dto.getReservationDate());
+	        pstmt.setString(4, dto.getReservationTime());
 
-            // 자유석이라면 수량/일수, 좌석형이면 기본값
-            pstmt.setInt(6, dto.getQuantity() != null ? dto.getQuantity() : 1);
-            pstmt.setInt(7, dto.getDays() != null ? dto.getDays() : 1);
+	        if (dto.getSeatId() != null) {
+	            pstmt.setInt(5, dto.getSeatId());
+	        } else {
+	            pstmt.setNull(5, java.sql.Types.INTEGER);
+	        }
 
-            pstmt.setString(8, dto.getPaymentStatus());
-            
-            int result = pstmt.executeUpdate();
-            return result == 1;
+	        pstmt.setInt(6, dto.getQuantity() != null ? dto.getQuantity() : 1);
+	        pstmt.setInt(7, dto.getDays() != null ? dto.getDays() : 1);
+	        pstmt.setString(8, dto.getPaymentStatus());
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
+	        int result = pstmt.executeUpdate();
+	        System.out.println("[DEBUG] insert 결과: " + result);
+
+	        return result == 1;
+
+	    } catch (Exception e) {
+	        System.out.println("[ERROR] 예매 insert 실패:");
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
 
     // 예매 중복 확인 메서드 추가
     public boolean isDuplicateReservation(String memberId, String performanceId, String date, String time, int seatId) {
@@ -77,7 +87,8 @@ public class ReservationDAO {
         Set<Integer> reservedSeatIds = new HashSet<>();
 
         String sql = "SELECT seat_id FROM reservations " +
-                     "WHERE performance_id = ? AND reservation_date = ? AND reservation_time = ? AND seat_id IS NOT NULL";
+                "WHERE performance_id = ? AND reservation_date = ? AND reservation_time = ? " +
+                "AND seat_id IS NOT NULL AND payment_status = '결제완료'";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -237,5 +248,22 @@ public class ReservationDAO {
         }
 
         return list;
+    }
+    
+    public Integer getSeatIdByReservationId(int reservationId) {
+        String sql = "SELECT seat_id FROM reservations WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, reservationId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                int seatId = rs.getInt("seat_id");
+                return rs.wasNull() ? null : seatId;  
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

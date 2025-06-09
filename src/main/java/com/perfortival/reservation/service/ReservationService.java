@@ -34,7 +34,16 @@ public class ReservationService {
     }
     
     public boolean cancelReservation(int reservationId) {
-        return reservationDAO.markReservationAsCancelled(reservationId);
+        boolean updated = reservationDAO.markReservationAsCancelled(reservationId);
+
+        if (updated) {
+            Integer seatId = reservationDAO.getSeatIdByReservationId(reservationId);  
+            if (seatId != null) {
+                seatDAO.markSeatAsAvailable(seatId);  
+            }
+        }
+
+        return updated;
     }
     
     public List<ReservationDTO> getAllReservations() {

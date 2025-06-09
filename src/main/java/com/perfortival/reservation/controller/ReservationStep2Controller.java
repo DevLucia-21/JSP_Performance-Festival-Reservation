@@ -1,6 +1,8 @@
 package com.perfortival.reservation.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.perfortival.member.dto.MemberDTO;
 import com.perfortival.performance.dao.PerformanceDAO;
@@ -21,7 +23,7 @@ public class ReservationStep2Controller extends HttpServlet {
 
     private ReservationService reservationService = new ReservationService();
     private PerformanceDAO performanceDAO = new PerformanceDAO();
-    private SeatService seatService = new SeatService(); // seatService 빠져 있었음
+    private SeatService seatService = new SeatService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -40,38 +42,49 @@ public class ReservationStep2Controller extends HttpServlet {
         String performanceId = request.getParameter("performanceId");
         String date = request.getParameter("date");
         String time = request.getParameter("time");
-        String seatIdStr = request.getParameter("seatId");
 
-        if (seatIdStr == null || seatIdStr.isEmpty()) {
-            request.setAttribute("error", "좌석 정보가 없습니다.");
-            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
-            return;
+        String seatIdsParam = request.getParameter("seatIds");
+        String[] seatIdArray = seatIdsParam != null ? seatIdsParam.split(",") : null;
+
+        String quantityStr = request.getParameter("quantity");
+        if (quantityStr != null && !quantityStr.isEmpty()) {
+            int quantity = Integer.parseInt(quantityStr);
+            if (seatIdArray == null || seatIdArray.length != quantity) {
+                request.setAttribute("error", "선택한 좌석 수가 예매 수량과 일치하지 않습니다.");
+                request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+                return;
+            }
         }
 
-        int seatId = Integer.parseInt(seatIdStr);
+        List<SeatDTO> selectedSeats = new ArrayList<>();
+        int totalPrice = 0;
 
-        boolean isDuplicate = reservationService.isDuplicateReservation(memberId, performanceId, date, time, seatId);
+        for (int i = 0; i < seatIdArray.length; i++) {
+            int seatId = Integer.parseInt(seatIdArray[i]);
 
-        if (isDuplicate) {
-            request.setAttribute("error", "이미 예매한 좌석입니다.");
-            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
-            return;
+            boolean isDuplicate = reservationService.isDuplicateReservation(
+                memberId, performanceId, date, time, seatId);
+
+            if (isDuplicate) {
+                request.setAttribute("error", "이미 예매한 좌석이 포함되어 있습니다.");
+                request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+                return;
+            }
+
+            SeatDTO seat = seatService.getSeatById(seatId);
+            if (seat != null) {
+                selectedSeats.add(seat);
+                totalPrice += seat.getPrice();
+            }
         }
-
-        // seatId로 SeatDTO 조회
-        SeatDTO seat = seatService.getSeatById(seatId);
-        String seatLabel = seat.getZone() + "-" + seat.getRow() + seat.getCol();
-        int price = seat.getPrice();
 
         PerformanceDTO performance = performanceDAO.getPerformanceById(performanceId);
 
-        // 결제 페이지로 전달
         request.setAttribute("performance", performance);
         request.setAttribute("date", date);
         request.setAttribute("time", time);
-        request.setAttribute("seatId", seatId);
-        request.setAttribute("seatLabel", seatLabel);
-        request.setAttribute("price", price);
+        request.setAttribute("selectedSeats", selectedSeats);
+        request.setAttribute("totalPrice", totalPrice);
 
         request.getRequestDispatcher("/WEB-INF/views/reservation/payment.jsp").forward(request, response);
     }

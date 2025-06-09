@@ -1,8 +1,12 @@
 package com.perfortival.reservation.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.perfortival.member.dto.MemberDTO;
+import com.perfortival.performance.dto.SeatDTO;
+import com.perfortival.performance.service.SeatService;
 import com.perfortival.reservation.dto.ReservationDTO;
 import com.perfortival.reservation.service.ReservationService;
 
@@ -16,8 +20,8 @@ import jakarta.servlet.http.HttpSession;
 @WebServlet("/reservation/complete")
 public class ReservationCompleteController extends HttpServlet {
 
-    private ReservationService reservationService = new ReservationService();
-    ReservationDTO dto = new ReservationDTO();
+    private final ReservationService reservationService = new ReservationService();
+    private final SeatService seatService = new SeatService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -36,29 +40,57 @@ public class ReservationCompleteController extends HttpServlet {
         String date = request.getParameter("date");
         String time = request.getParameter("time");
         String daysStr = request.getParameter("days");
-        if (daysStr != null && !daysStr.isEmpty()) {
-            dto.setDays(Integer.parseInt(daysStr));
-        }
-        String seatIdStr = request.getParameter("seatId");
-        Integer seatId = null;
-        if (seatIdStr != null && !seatIdStr.isEmpty()) {
-            seatId = Integer.parseInt(seatIdStr);
-        }
-        int price = Integer.parseInt(request.getParameter("price"));
+        String[] seatIdArray = request.getParameterValues("seatId");
         String cardNumber = request.getParameter("cardNumber");
 
-        dto.setMemberId(loginUser.getId());
-        dto.setPerformanceId(performanceId);
-        dto.setReservationDate(date);
-        dto.setReservationTime(time);
-        dto.setSeatId(seatId);
-        dto.setPaymentStatus("결제완료");
+        int days = (daysStr != null && !daysStr.isEmpty()) ? Integer.parseInt(daysStr) : 1;
+        int totalPrice = 0;
+        List<String> seatLabels = new ArrayList<>();
 
-        boolean result = reservationService.reserve(dto);
+        boolean allSuccess = true;
 
-        if (result) {
+        if (seatIdArray != null && seatIdArray.length > 0) {
+            for (String seatIdStr : seatIdArray) {
+                try {
+                    int seatId = Integer.parseInt(seatIdStr.trim());
+                    SeatDTO seat = seatService.getSeatById(seatId);
+                    if (seat == null) {
+                        allSuccess = false;
+                        break;
+                    }
+
+                    int price = seat.getPrice();
+                    totalPrice += price;
+                    String label = seat.getZone() + "-" + seat.getRow() + seat.getCol();
+                    seatLabels.add(label);
+
+                    ReservationDTO dto = new ReservationDTO();
+                    dto.setMemberId(loginUser.getId());
+                    dto.setPerformanceId(performanceId);
+                    dto.setReservationDate(date);
+                    dto.setReservationTime(time);
+                    dto.setSeatId(seatId);
+                    dto.setDays(days);
+                    dto.setQuantity(1);
+                    dto.setPaymentStatus("결제완료");
+
+                    boolean result = reservationService.reserve(dto);
+                    if (!result) {
+                        allSuccess = false;
+                        break;
+                    }
+
+                } catch (Exception e) {
+                    allSuccess = false;
+                    break;
+                }
+            }
+        }
+
+        if (allSuccess) {
             String maskedCardNumber = maskCardNumber(cardNumber);
-            request.setAttribute("price", price);
+            request.setAttribute("totalPrice", totalPrice);
+            request.setAttribute("seatLabels", seatLabels);
             request.setAttribute("maskedCardNumber", maskedCardNumber);
             request.getRequestDispatcher("/WEB-INF/views/reservation/complete.jsp").forward(request, response);
         } else {

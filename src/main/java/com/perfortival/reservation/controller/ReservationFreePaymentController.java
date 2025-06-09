@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpSession;
 @WebServlet("/reservation/payment")
 public class ReservationFreePaymentController extends HttpServlet {
 
-    private PerformanceDAO performanceDAO = new PerformanceDAO();
+    private final PerformanceDAO performanceDAO = new PerformanceDAO();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -31,34 +31,47 @@ public class ReservationFreePaymentController extends HttpServlet {
             return;
         }
 
+        // 파라미터 받기
         String performanceId = request.getParameter("performanceId");
         String date = request.getParameter("date");
         String time = request.getParameter("time");
+        String quantityStr = request.getParameter("quantity");
+        String daysStr = request.getParameter("days");
+        String seatPriceStr = request.getParameter("seatPrice");
 
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
-        int days = Integer.parseInt(request.getParameter("days"));
-        int basePrice = Integer.parseInt(request.getParameter("seatPrice")); // or basePrice
-
-        int totalPrice = 0;
-
-        if (days == 1) {
-            totalPrice = basePrice * quantity;
-        } else if (days == 2) {
-            totalPrice = (int)(basePrice * 2 * 0.9 * quantity);
-        } else if (days == 3) {
-            totalPrice = (int)(basePrice * 3 * 0.85 * quantity);
+        // 필수값 null/빈값 검사
+        if (performanceId == null || quantityStr == null || daysStr == null || seatPriceStr == null ||
+            performanceId.isEmpty() || quantityStr.isEmpty() || daysStr.isEmpty() || seatPriceStr.isEmpty()) {
+            request.setAttribute("error", "필수 정보가 누락되었습니다.");
+            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+            return;
         }
 
+        // 파싱
+        int quantity = Integer.parseInt(quantityStr);
+        int days = Integer.parseInt(daysStr);
+        int basePrice = Integer.parseInt(seatPriceStr);
+
+        // 할인 적용
+        double discount = 1.0;
+        if (days == 2) discount = 0.9;
+        else if (days == 3) discount = 0.85;
+
+        int totalPrice = (int)(basePrice * days * discount * quantity);
+
+        // 공연 정보 조회
         PerformanceDTO performance = performanceDAO.getPerformanceById(performanceId);
 
+        // 결과 세팅
         request.setAttribute("performance", performance);
         request.setAttribute("date", date);
         request.setAttribute("time", time);
         request.setAttribute("quantity", quantity);
         request.setAttribute("days", days);
-        request.setAttribute("price", totalPrice);
-        request.setAttribute("seatLabel", null); // 자유석
+        request.setAttribute("totalPrice", totalPrice);
+        request.setAttribute("seatLabel", null); // 자유석은 좌석 정보 없음
 
+        // 결제 페이지 이동
         request.getRequestDispatcher("/WEB-INF/views/reservation/payment.jsp").forward(request, response);
     }
 }

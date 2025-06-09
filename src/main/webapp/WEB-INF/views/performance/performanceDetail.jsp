@@ -52,7 +52,16 @@
                         <option value="${t.time}">${t.time}</option>
                     </c:forEach>
                 </select>
-
+                
+                <!-- 자유석이 아닐 경우에만 수량 선택 -->
+                <c:if test="${performance.reservationType ne '자유석'}">
+                    <label>수량:</label>
+                    <select name="quantity" required>
+                        <option value="1">1장</option>
+                        <option value="2">2장</option>
+                    </select>
+                </c:if>
+                
                 <!-- 공연 ID 숨김 전달 -->
                 <input type="hidden" name="performanceId" value="${performance.id}" />
 
