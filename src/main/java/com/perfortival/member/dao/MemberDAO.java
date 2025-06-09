@@ -9,11 +9,11 @@ import com.perfortival.member.dto.MemberDTO;
 
 public class MemberDAO {
 
-    //로그인 메서드
+    // 로그인 메서드
     public MemberDTO login(String id, String pw) {
         MemberDTO member = null;
 
-        String sql = "SELECT id, pw, name, email, is_admin FROM members WHERE id = ? AND pw = ?";
+        String sql = "SELECT id, pw, name, email, is_admin, address FROM members WHERE id = ? AND pw = ?";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -29,7 +29,8 @@ public class MemberDAO {
                 member.setPw(rs.getString("pw"));
                 member.setName(rs.getString("name"));
                 member.setEmail(rs.getString("email"));
-                member.setAdmin(rs.getBoolean("is_admin"));  // 관리자 여부 반영
+                member.setAdmin(rs.getBoolean("is_admin"));
+                member.setAddress(rs.getString("address"));
             }
 
         } catch (Exception e) {
@@ -39,9 +40,9 @@ public class MemberDAO {
         return member;
     }
 
-    //회원가입 메서드
+    // 회원가입 메서드
     public boolean signup(MemberDTO member) {
-        String sql = "INSERT INTO members (id, pw, name, email, is_admin) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO members (id, pw, name, email, is_admin, address) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -50,7 +51,8 @@ public class MemberDAO {
             pstmt.setString(2, member.getPw());
             pstmt.setString(3, member.getName());
             pstmt.setString(4, member.getEmail());
-            pstmt.setBoolean(5, member.isAdmin());  // 관리자 여부 저장
+            pstmt.setBoolean(5, member.isAdmin());
+            pstmt.setString(6, member.getAddress());
 
             int rows = pstmt.executeUpdate();
             return rows > 0;
@@ -61,9 +63,9 @@ public class MemberDAO {
         }
     }
 
-    //회원 정보 업데이트 메서드
+    // 회원 정보 업데이트 메서드
     public boolean update(MemberDTO member) {
-        String sql = "UPDATE members SET pw = ?, name = ?, email = ?, is_admin = ? WHERE id = ?";
+        String sql = "UPDATE members SET pw = ?, name = ?, email = ?, is_admin = ?, address = ? WHERE id = ?";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -71,8 +73,9 @@ public class MemberDAO {
             pstmt.setString(1, member.getPw());
             pstmt.setString(2, member.getName());
             pstmt.setString(3, member.getEmail());
-            pstmt.setBoolean(4, member.isAdmin());  // 관리자 여부 업데이트
-            pstmt.setString(5, member.getId());
+            pstmt.setBoolean(4, member.isAdmin());
+            pstmt.setString(5, member.getAddress());
+            pstmt.setString(6, member.getId());
 
             int rows = pstmt.executeUpdate();
             return rows > 0;
@@ -82,7 +85,7 @@ public class MemberDAO {
         }
     }
 
-    //회원 탈퇴 메서드
+    // 회원 탈퇴 메서드
     public boolean deleteMember(String id) {
         String sql = "DELETE FROM members WHERE id = ?";
 
@@ -97,5 +100,64 @@ public class MemberDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // 아이디 중복 확인
+    public boolean isDuplicateId(String id) {
+        boolean isDuplicate = false;
+        String sql = "SELECT COUNT(*) FROM members WHERE id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    isDuplicate = rs.getInt(1) > 0;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return isDuplicate;
+    }
+    
+    public String findIdByNameAndEmail(String name, String email) {
+        String sql = "SELECT id FROM members WHERE name = ? AND email = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name);
+            pstmt.setString(2, email);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    public String findPwByNameIdEmail(String name, String id, String email) {
+        String sql = "SELECT pw FROM members WHERE name = ? AND id = ? AND email = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            pstmt.setString(2, id);
+            pstmt.setString(3, email);
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("pw");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

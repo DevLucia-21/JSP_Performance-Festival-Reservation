@@ -23,7 +23,12 @@
         비밀번호: <input type="password" name="pw"><br><br>
         <input type="submit" value="로그인">
     </form>
-    
+
+    <p>
+        <a href="<%= request.getContextPath() %>/member/findIdPage">아이디 찾기</a>
+        <a href="<%= request.getContextPath() %>/member/findPwPage">비밀번호 찾기</a>
+    </p>
+
     <%
         String error = request.getParameter("error");
         if ("1".equals(error)) {
@@ -32,6 +37,6 @@
     <%
         }
     %>
-    
+
 </body>
 </html>

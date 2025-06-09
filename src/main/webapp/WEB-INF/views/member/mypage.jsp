@@ -27,6 +27,7 @@
     <p><strong>ID:</strong> <%= member.getId() %></p>
     <p><strong>이름:</strong> <%= member.getName() %></p>
     <p><strong>이메일:</strong> <%= member.getEmail() %></p>
+    <p><strong>주소:</strong> <%= member.getAddress() %></p>
 
     <hr>
     <a href="<%= request.getContextPath() %>/member/update">회원 정보 수정</a> |

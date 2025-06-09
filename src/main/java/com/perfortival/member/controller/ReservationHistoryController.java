@@ -27,11 +27,16 @@ public class ReservationHistoryController extends HttpServlet {
         MemberDTO loginUser = (MemberDTO) session.getAttribute("loginUser");
 
         if (loginUser == null) {
-            response.sendRedirect(request.getContextPath() + "/member/login");
+            response.sendRedirect(request.getContextPath() + "/member/login?error=needLogin");
             return;
         }
 
         String memberId = loginUser.getId();
+        if (memberId == null || memberId.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/member/login?error=invalidAccess");
+            return;
+        }
+
         List<ReservationDTO> reservationList = reservationService.getReservationsByMemberId(memberId);
 
         request.setAttribute("reservationHistory", reservationList);

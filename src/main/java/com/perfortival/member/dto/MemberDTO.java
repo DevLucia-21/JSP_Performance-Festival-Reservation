@@ -6,6 +6,7 @@ public class MemberDTO {
     private String name;
     private String email;
     private boolean isAdmin;  // 관리자 여부 필드 추가
+    private String address;
 
     public MemberDTO() {}
 
@@ -56,5 +57,13 @@ public class MemberDTO {
 
     public void setAdmin(boolean isAdmin) {
         this.isAdmin = isAdmin;
+    }
+    
+    public String getAddress() {
+    	return address; 
+    }
+    
+    public void setAddress(String address) {
+    	this.address = address; 
     }
 }

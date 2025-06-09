@@ -19,7 +19,7 @@ public class LoginController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // /WEB-INF/views/member/login.jsp로 포워딩
+        // 로그인 페이지로 포워딩
         request.getRequestDispatcher("/WEB-INF/views/member/login.jsp").forward(request, response);
     }
     
@@ -36,17 +36,17 @@ public class LoginController extends HttpServlet {
         MemberDTO member = dao.login(id, pw);
 
         if (member != null) {
+            // 로그인 성공 시 세션에 사용자 정보 저장
             HttpSession session = request.getSession();
-            session.setAttribute("loginUser", member);
+            session.setAttribute("loginUser", member); 
             session.setAttribute("isAdmin", member.isAdmin());
 
-            // 세션 유효 시간 1시간으로 설정
+            // 세션 유효 시간 1시간
             session.setMaxInactiveInterval(60 * 60);
 
-            // 로그인 성공 시 main로 이동
             response.sendRedirect(request.getContextPath() + "/main");
         } else {
-            // 로그인 실패 시 로그인 페이지로 이동 + 에러 파라미터 추가
+            // 로그인 실패 시 로그인 페이지로 이동 + 에러 파라미터 포함
             response.sendRedirect(request.getContextPath() + "/member/login?error=1");
         }
     }
