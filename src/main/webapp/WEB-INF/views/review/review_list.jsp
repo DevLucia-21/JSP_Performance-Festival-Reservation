@@ -55,21 +55,33 @@
         <c:forEach var="review" items="${reviewList}">
             <tr>
                 <td colspan="3">
-                    <b>[ 공연 ${review.reviewType} ]</b>
-                    ${review.performanceTitle} ｜ ${review.memberId} ｜ ${review.createdAt}
-                    
                     <c:if test="${review.isDeleted == 0}">
-                        <!-- 좋아요 / 싫어요 -->
-                        <form action="${pageContext.request.contextPath}/review/like" method="post" style="display:inline; margin-left: 10px;">
-                            <input type="hidden" name="reviewId" value="${review.id}" />
-                            <input type="hidden" name="isLike" value="true" />
-                            <button type="submit">👍 ${review.likes}</button>
-                        </form>
-                        <form action="${pageContext.request.contextPath}/review/like" method="post" style="display:inline; margin-left: 5px;">
-                            <input type="hidden" name="reviewId" value="${review.id}" />
-                            <input type="hidden" name="isLike" value="false" />
-                            <button type="submit">👎 ${review.dislikes}</button>
-                        </form>
+										    <div style="margin-top: 5px; display: flex; align-items: center; gap: 10px;">
+										    		<div>
+												    		<b>[ 공연 ${review.reviewType} ]</b>
+		                    				${review.performanceTitle} ｜ ${review.memberId} ｜ ${review.createdAt}
+                    				</div>
+                    				
+										        <!-- 별점 -->
+										        <div>
+										            <c:forEach begin="1" end="${review.rating}">★</c:forEach>
+										            <c:forEach begin="1" end="${5 - review.rating}">☆</c:forEach>
+										        </div>
+										
+										        <!-- 좋아요 / 싫어요 -->
+										        <div>
+										            <form action="${pageContext.request.contextPath}/review/like" method="post" style="display:inline;">
+										                <input type="hidden" name="reviewId" value="${review.id}" />
+										                <input type="hidden" name="isLike" value="true" />
+										                <button type="submit">👍 ${review.likes}</button>
+										            </form>
+										            <form action="${pageContext.request.contextPath}/review/like" method="post" style="display:inline;">
+										                <input type="hidden" name="reviewId" value="${review.id}" />
+										                <input type="hidden" name="isLike" value="false" />
+										                <button type="submit">👎 ${review.dislikes}</button>
+										            </form>
+										        </div>
+										    </div>
 
                         <!-- 본인 수정/삭제 -->
                         <c:if test="${loginUser != null and loginUser.id == review.memberId}">
@@ -92,14 +104,13 @@
                         </c:if>
                     </c:if>
 
-                    <br>
                     <c:choose>
                         <c:when test="${review.isDeleted == 1}">
                             <br>
                             <i style="color: gray;">(관리자에 의해 삭제된 후기입니다)</i>
                         </c:when>
                         <c:otherwise>
-                            <br>
+                            <br>            
                             ▶ ${fn:replace(review.content, '\\n', '<br/>')}
                         </c:otherwise>
                     </c:choose>

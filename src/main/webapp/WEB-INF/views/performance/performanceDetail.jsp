@@ -30,6 +30,18 @@
             <p><strong>장소:</strong> ${performance.location}</p>
             <p><strong>기간:</strong> ${performance.startDate} ~ ${performance.endDate}</p>
             <p><strong>장르:</strong> ${performance.genre}</p>
+            
+            <c:if test="${avgRating > 0}">
+						    <p><strong>평균 별점: </strong>
+						        <c:forEach var="i" begin="1" end="${fn:substringBefore(avgRating, '.')+0}">
+						            ★
+						        </c:forEach>
+						        (${fn:substring(avgRating, 0, 3)} / 5.0)
+						    </p>
+						</c:if>
+						<c:if test="${avgRating == 0}">
+						    <p>아직 별점이 없습니다.</p>
+						</c:if>
 
             <!-- 예매 영역 시작 -->
             <hr>

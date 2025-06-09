@@ -11,6 +11,7 @@ import com.perfortival.performance.dto.PerformanceDTO;
 import com.perfortival.performance.dto.PerformanceTimeDTO;
 import com.perfortival.performance.dto.SeatDTO;
 import com.perfortival.performance.service.PerformanceService;
+import com.perfortival.review.dao.ReviewDAO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -22,10 +23,14 @@ import jakarta.servlet.http.HttpServletResponse;
 public class PerformanceDetailController extends HttpServlet {
 
     private PerformanceService performanceService = new PerformanceService();
+    private ReviewDAO reviewDAO = new ReviewDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String id = request.getParameter("id");
+        String performanceId = request.getParameter("id"); // 공연 ID
+        double avgRating = reviewDAO.getAverageRating(performanceId);
+        request.setAttribute("avgRating", avgRating);
 
         if (id == null || id.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/performances/search");

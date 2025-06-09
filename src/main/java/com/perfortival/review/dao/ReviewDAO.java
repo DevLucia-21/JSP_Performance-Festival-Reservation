@@ -250,4 +250,23 @@ public class ReviewDAO {
 
         return list;
     }
+    
+    // 특정 공연의 평균 별점 반환
+    public double getAverageRating(String performanceId) {
+        double avg = 0.0;
+        String sql = "SELECT AVG(rating) FROM reviews WHERE performance_id = ? AND is_deleted = 0";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, performanceId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                avg = rs.getDouble(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return avg;
+    }
 }
