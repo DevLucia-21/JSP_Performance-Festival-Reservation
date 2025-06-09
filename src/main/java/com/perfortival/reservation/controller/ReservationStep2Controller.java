@@ -34,7 +34,7 @@ public class ReservationStep2Controller extends HttpServlet {
 
         MemberDTO loginUser = (MemberDTO) session.getAttribute("loginUser");
         if (loginUser == null) {
-            response.sendRedirect(request.getContextPath() + "/member/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/member/login"); 
             return;
         }
 

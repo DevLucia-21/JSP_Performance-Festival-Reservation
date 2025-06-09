@@ -266,4 +266,29 @@ public class ReservationDAO {
         }
         return null;
     }
+    
+    public int getUserReservationCount(String memberId, String performanceId, String date, String time) {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM reservations WHERE member_id = ? AND performance_id = ? " +
+                     "AND reservation_date = ? AND reservation_time = ? AND payment_status = '결제완료'";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, memberId);
+            pstmt.setString(2, performanceId);
+            pstmt.setString(3, date);
+            pstmt.setString(4, time);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
 }

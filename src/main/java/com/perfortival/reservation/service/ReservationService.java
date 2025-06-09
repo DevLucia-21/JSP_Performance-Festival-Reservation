@@ -49,4 +49,8 @@ public class ReservationService {
     public List<ReservationDTO> getAllReservations() {
         return reservationDAO.getAllReservations();
     }
+    
+    public int getUserReservationCount(String memberId, String performanceId, String date, String time) {
+        return reservationDAO.getUserReservationCount(memberId, performanceId, date, time);
+    }
 }

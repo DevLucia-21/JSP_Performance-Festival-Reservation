@@ -1,6 +1,7 @@
 package com.perfortival.reservation.controller;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -10,7 +11,8 @@ import com.perfortival.member.dto.MemberDTO;
 import com.perfortival.performance.dao.PerformanceDAO;
 import com.perfortival.performance.dto.PerformanceDTO;
 import com.perfortival.performance.dto.SeatDTO;
-import com.perfortival.performance.service.SeatService; // 추가
+import com.perfortival.performance.service.SeatService;
+import com.perfortival.reservation.service.ReservationService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -23,7 +25,8 @@ import jakarta.servlet.http.HttpSession;
 public class ReservationStep1Controller extends HttpServlet {
 
     private PerformanceDAO performanceDAO = new PerformanceDAO();
-    private SeatService seatService = new SeatService(); // 추가
+    private SeatService seatService = new SeatService();
+    private ReservationService reservationService = new ReservationService(); // 추가
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -38,7 +41,7 @@ public class ReservationStep1Controller extends HttpServlet {
 
         MemberDTO loginUser = (MemberDTO) session.getAttribute("loginUser");
         if (loginUser == null) {
-            response.sendRedirect(request.getContextPath() + "/member/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/member/login"); 
             return;
         }
 
@@ -49,19 +52,34 @@ public class ReservationStep1Controller extends HttpServlet {
             return;
         }
 
+        // 예매 수량 제한 확인 (1인당 최대 2개)
+        int userReservationCount = reservationService.getUserReservationCount(
+        	    loginUser.getId(), performanceId, date, time
+    	);
+    	if (userReservationCount >= 2) {
+    	    response.setContentType("text/html; charset=UTF-8");
+    	    PrintWriter out = response.getWriter();
+    	    out.println("<script>");
+    	    out.println("alert('이미 이 공연에 대해 최대 수량(2개)을 예매하셨습니다.');");
+    	    out.println("location.href='" + request.getContextPath() + "/performances/detail?id=" + performanceId + "';");
+    	    out.println("</script>");
+    	    out.close();
+    	    return;
+    	}
+
         String reservationType = performance.getReservationType();
         System.out.println("[DEBUG] reservationType = " + reservationType);
 
         request.setAttribute("performance", performance);
         request.setAttribute("date", date);
         request.setAttribute("time", time);
-        
+
         String quantityStr = request.getParameter("quantity");
         int quantity = 1;
         try {
             quantity = Integer.parseInt(quantityStr);
             if (quantity < 1 || quantity > 2) {
-                quantity = 1; // 기본값 보정
+                quantity = 1;
             }
         } catch (NumberFormatException e) {
             quantity = 1;
@@ -83,7 +101,6 @@ public class ReservationStep1Controller extends HttpServlet {
             return;
         }
 
-        // 좌석 확장 방식으로 수정
         List<SeatDTO> seatList = seatService.getSeatListWithReservation(performanceId, date, time);
         request.setAttribute("seatList", seatList);
 
