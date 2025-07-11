@@ -33,7 +33,6 @@ public class FindIdController extends HttpServlet {
             request.setAttribute("error", "일치하는 회원 정보가 없습니다.");
         }
 
-        // 결과 페이지로 포워딩
         request.getRequestDispatcher("/WEB-INF/views/member/findIdResult.jsp").forward(request, response);
     }
 }

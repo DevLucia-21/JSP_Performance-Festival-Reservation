@@ -81,6 +81,8 @@
 
         <br>
         <input type="submit" value="설정 완료">
+        <br><br>
+				<button type="button" onclick="location.href='<%= request.getContextPath() %>/admin/performances'">이전 페이지로</button>
     </form>
 
     <script>

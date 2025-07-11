@@ -15,7 +15,6 @@ public class FindPwPageController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // JSP 포워딩
         request.getRequestDispatcher("/WEB-INF/views/member/findPw.jsp").forward(request, response);
     }
 }

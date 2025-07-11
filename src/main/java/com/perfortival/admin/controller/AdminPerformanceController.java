@@ -62,7 +62,7 @@ public class AdminPerformanceController extends HttpServlet {
                 case "reservation":
                     if (selectedIds != null && selectedIds.length > 0) {
                         handleReservation(selectedIds, request, response);
-                        return; // ❗ redirect 후 반드시 return
+                        return; 
                     } else {
                         System.out.println("[WARN] 예매 방식 설정할 공연이 선택되지 않았습니다.");
                     }

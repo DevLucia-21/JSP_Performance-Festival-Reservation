@@ -36,6 +36,8 @@
     <button type="button" onclick="addTime()">+ 시간 추가</button>
     <br><br>
     <button type="submit">등록</button>
+    <br><br>
+				<button type="button" onclick="location.href='<%= request.getContextPath() %>/admin/performances'">이전 페이지로</button>
 </form>
 
 <script>

@@ -174,7 +174,7 @@ public class ReservationDAO {
                     seat.setRow(rs.getString("row"));
                     seat.setCol(rs.getString("col"));
 
-                    dto.setSeat(seat);  // ✅ ReservationDTO에 set
+                    dto.setSeat(seat);  
                 }
 
                 list.add(dto);

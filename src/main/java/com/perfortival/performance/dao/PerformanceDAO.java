@@ -20,7 +20,7 @@ public class PerformanceDAO {
                      "ON DUPLICATE KEY UPDATE " +
                      "title = VALUES(title), " +
                      "start_date = VALUES(start_date), " +
-                     "end_date = VALUES(endDate), " +
+                     "end_date = VALUES(end_date), " +
                      "location = VALUES(location), " +
                      "genre = VALUES(genre), " +
                      "poster_url = VALUES(poster_url), " +

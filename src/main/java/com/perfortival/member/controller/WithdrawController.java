@@ -17,7 +17,7 @@ public class WithdrawController extends HttpServlet {
 	
 	@Override
 		protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// 탈퇴 페이지로 포워딩
+		
 		request.getRequestDispatcher("/WEB-INF/views/member/withdraw.jsp").forward(request, response);
 	}
 

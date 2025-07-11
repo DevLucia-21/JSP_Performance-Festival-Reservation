@@ -24,9 +24,9 @@ public class CommentDAO {
 	            	CommentDTO dto = new CommentDTO();
 	            	dto.setId(rs.getInt("id"));
 	            	dto.setReviewId(rs.getInt("review_id"));
-	            	dto.setMemberId(rs.getString("member_id"));  // ✅ 수정
+	            	dto.setMemberId(rs.getString("member_id"));  
 	            	dto.setContent(rs.getString("content"));
-	            	dto.setCreatedAt(rs.getTimestamp("created_at").toString());  // toString 처리도 추가
+	            	dto.setCreatedAt(rs.getTimestamp("created_at").toString());  
 	            	dto.setIsDeleted(rs.getInt("is_deleted"));
 	            	list.add(dto);
 	            }

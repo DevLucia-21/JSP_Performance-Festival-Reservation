@@ -215,8 +215,8 @@ public class PerformanceService {
                     seat.setFloor(1);
                     seat.setSection("1층");
                     seat.setZone(String.valueOf(zone));
-                    seat.setRow("V");           // row = A~D
-                    seat.setCol(String.valueOf(i));                       // col = V1~V4
+                    seat.setRow("V");         
+                    seat.setCol(String.valueOf(i));                  
                     System.out.println("[DEBUG] zone=" + zone + ", row=" + seat.getRow() + ", col=" + seat.getCol());
                     seat.setEntryNumber(i);
                     seat.setPrice(priceMap.get("VIP"));
@@ -325,7 +325,7 @@ public class PerformanceService {
                     seat.setSection("1층");
                     seat.setZone(String.valueOf(zone));
                     seat.setRow("T"); // row = T
-                    seat.setCol(String.valueOf(i)); // col = 1~4
+                    seat.setCol(String.valueOf(i)); 
                     seat.setEntryNumber(i);
                     seat.setPrice(priceMap.get("스탠딩"));
                     seat.setReserved(false);
@@ -344,7 +344,7 @@ public class PerformanceService {
                     seat.setSection("2층");
                     seat.setZone(String.valueOf(zone));
                     seat.setRow("R");
-                    seat.setCol(String.valueOf(i)); // col = 1~6
+                    seat.setCol(String.valueOf(i)); 
                     seat.setEntryNumber(i);
                     seat.setPrice(priceMap.get("좌석"));
                     seat.setReserved(false);
